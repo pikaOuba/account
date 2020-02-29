@@ -23,12 +23,32 @@ const api = new Api();
 const FormItem = Form.Item;
 const dateFormat = "YYYY-MM-DD";
 const { RangePicker } = DatePicker;
-const reason = ["颜色不对", "有破损", "尺寸不对"];
+const reason = ["颜色不对", "破损", "尺寸不对"];
 const problemReason = ["有问题", "没问题", "无法发货"];
+const checkTypes = ["全部","用户和运管","用户和仓管", "运管和仓管"]
 const formItemLayout = {
   labelCol: { span: 7 },
   wrapperCol: { span: 14 }
 };
+
+const replyColumns = [
+  {
+    title: "时间",
+    dataIndex: "replyTime",
+    key: "replyTime"
+  },
+  {
+    title: "回复内容",
+    dataIndex: "replyContent",
+    key: "replyContent"
+  },
+  {
+    title: "备注",
+    dataIndex: "remark",
+    key: "remark"
+  }
+];
+
 class StoreManage extends Component {
   constructor(props) {
     super(props);
@@ -66,7 +86,9 @@ class StoreManage extends Component {
       ckSendOrderVisible: false,
       ckReplyVisible:false,
       ckSendOrderFormData: {//运单发货
-      }
+      },
+      checkType: "",//仓库查看选择的类型
+      ckReplys: [],
     };
   }
 
@@ -95,8 +117,13 @@ class StoreManage extends Component {
       params.objectiveCountry = search.objectiveCountry;
     }
     if(search.problemCause) {
-      params.problemCause = search.problemCause;
+      const problemCauseMap = new Map([["颜色不对","1"],["尺寸不对","2"],["破损","3"]]);
+      params.problemCause = problemCauseMap.get(search.problemCause);
     }
+    if(search.inlandNumber) {
+      params.inlandNumber = search.inlandNumber;
+    }
+    
     api.$get(apiList3.getStoreOrders.path, params, res => {
       if(res.code !== 500) {
         let list = objToArray(res) || [];
@@ -263,6 +290,7 @@ class StoreManage extends Component {
               ckSendOrderVisible: true,
               ckSendOrderFormData: {
                 inlandNumber: a.inlandNumber,
+                objectiveCountry: a.objectiveCountry
               }
             })
           }}
@@ -304,6 +332,10 @@ class StoreManage extends Component {
         title: "问题原因",
         dataIndex: "problemCause",
         key: "problemCause",
+        render: a => {
+          const problemCauseMap = new Map([["1","颜色不对"], ["2","破损"], ["3","尺寸不对"]]);
+          return problemCauseMap.get(a);
+        }
       },
       { 
         title: "操作",
@@ -327,6 +359,14 @@ class StoreManage extends Component {
         </span>
         <span
           style={{ cursor: "pointer", marginRight: "10px" }}
+          onClick={()=>{
+            this.setState({
+              inlandNumber: a.inlandNumber,
+              ckReplyCheckVisible: true,
+            }, ()=> {
+              this.getReplys();
+            })
+          }}
         >
           查看
         </span>
@@ -681,6 +721,7 @@ class StoreManage extends Component {
         </Button>
           <Button
             className=" add_btn"
+            onClick={this.handleSendOrderSubmit.bind(this)}
           >
             提交
           </Button>
@@ -699,14 +740,6 @@ class StoreManage extends Component {
                 className="input"
                 disabled={true}
                 value={ckSendOrderFormData.objectiveCountry}
-                onChange={(e)=>{
-                  this.setState({
-                    ckSendOrderFormData:{
-                      ...ckSendOrderFormData,
-                      ckSendOrderFormData: e.target.value
-                    }
-                  });
-                }}
         />
     </FormItem>
     {noChoice ? (
@@ -721,38 +754,45 @@ class StoreManage extends Component {
   </Modal>
   }
 
-handleCloseCkReplyModal() {
-  this.setState({
-    ckReplyFormData: {},
-    ckReplyVisible: false,
-  });
-}
+  handleCloseCkReplyModal() {
+    this.setState({
+      ckReplyFormData: {},
+      ckReplyVisible: false,
+    });
+  }
+
+  handleCloseCkReplyCheckModal() {
+    this.setState({
+      ckReplyCheckVisible: false,
+      checkType: ""
+    });
+  }
 
   //仓库回复
   ckReplyModal() {
     const { ckReplyFormData, noChoice } = this.state;
     return  <Modal
-    title="仓库回复"
-    wrapClassName="admin_modal column"
-    width={"520px"}
-    visible={this.state.ckReplyVisible}
-    onCancel={this.handleCloseCkReplyModal.bind(this)}
-    footer={
-      <div className="action">
-        <Button
-          style={{ backgroundColor: "transparent" }}
-          onCancel={this.handleCloseCkReplyModal.bind(this)}
-        >
-          关闭
-        </Button>
+      title="仓库回复"
+      wrapClassName="admin_modal column"
+      width={"520px"}
+      visible={this.state.ckReplyVisible}
+      onCancel={this.handleCloseCkReplyModal.bind(this)}
+      footer={
+        <div className="action">
           <Button
-            className=" add_btn"
-            onClick={this.handleCkReply.bind(this)}
+            style={{ backgroundColor: "transparent" }}
+            onCancel={this.handleCloseCkReplyModal.bind(this)}
           >
-            提交
+            关闭
           </Button>
-      </div>
-    }
+            <Button
+              className=" add_btn"
+              onClick={this.handleCkReply.bind(this)}
+            >
+              提交
+            </Button>
+        </div>
+      }
   >
     <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
         <Input placeholder="运单号"
@@ -798,6 +838,86 @@ handleCloseCkReplyModal() {
             // onClose={onClose}
           />
         ) : null}
+    </Modal>
+  }
+
+  ckReplyCheckModal() {
+    const { inlandNumber, noChoice, checkType } = this.state;
+    return  <Modal
+    title="仓库回复查看"
+    wrapClassName="admin_modal column"
+    width={"520px"}
+    visible={this.state.ckReplyCheckVisible}
+    onCancel={this.handleCloseCkReplyCheckModal.bind(this)}
+    footer={
+      <div className="action">
+        <Button
+          style={{ backgroundColor: "transparent" }}
+          onClick={this.handleCloseCkReplyCheckModal.bind(this)}
+        >
+          关闭
+        </Button>
+      </div>
+    }
+  >
+    <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
+        <Input placeholder="运单号"
+                className="input"
+                disabled={true}
+                value={inlandNumber}
+        />
+    </FormItem>
+    <FormItem
+      {...formItemLayout}
+      label={
+        <span>
+          查看类型
+        </span>
+      }
+      // validateStatus={checked_status}
+    >
+      <Select
+            value={checkType || "选择类型"}
+            style={{ width: 200 }}
+            onChange={val => {
+              this.setState({
+                checkType: val
+              }, () => {
+                this.getReplys(val);
+              })
+            }}
+          >
+            {checkTypes.map(a => {
+              return (
+                <Select.Option value={a} key={a}>
+                  {a}
+                </Select.Option>
+              );
+            })}
+          </Select>
+    </FormItem>
+    <Table
+      columns={replyColumns}
+      dataSource={this.state.ckReplys}
+      bordered
+      loading={this.state.loading}
+      pagination={{
+        current: 1,
+        pageSize: 10,
+        showQuickJumper: false,
+        showSizeChanger: false,
+        // total: this.state.totalCount
+      }}
+    />
+    {noChoice ? (
+          <Alert
+            message={this.state.message}
+            type="error"
+            closable
+            showIcon={true}
+            // onClose={onClose}
+          />
+        ) : null}
   </Modal>
   }
 
@@ -815,6 +935,24 @@ handleCloseCkReplyModal() {
           addEditVisible: false
         });
         this.getOrders();
+    })
+  }
+
+  handleSendOrderSubmit() {
+    const { ckSendOrderFormData } = this.state
+    const params = {
+      type: "ckSendOrder",
+      inlandNumber: ckSendOrderFormData.inlandNumber
+    };
+    
+    if(ckSendOrderFormData.objectiveCountry) {
+      params.objectiveCountry = ckSendOrderFormData.objectiveCountry;
+    }
+    
+    api.$get(apiList3.storeOperations.path, params , res => {
+      this.setState({
+        ckSendOrderVisible: false
+      });
     })
   }
 
@@ -853,6 +991,32 @@ handleCloseCkReplyModal() {
     }, () => {
       this.getOrders()
     })
+  }
+
+  getReplys() {
+    const { checkType, inlandNumber } = this.state
+    const params = { waybillNumber: inlandNumber, type: "ckReplyCheck" };
+    const checkTypeMap = new Map([["全部","1"], ["用户和运管","2"], ["用户和仓管","3"], ["运管和仓管","4"]]);
+    if(checkType) {
+      params.checkType = checkTypeMap.get(checkType)
+    }
+    api.$get(apiList3.getStoreOrders.path, params, res => {
+      if(res.code !== 500) {
+        let list = objToArray(res) || [];
+        this.setState({
+          ckReplys: [...list],
+          totalCount: res.totalCount || 0,
+          loading: false
+        });
+      } else {
+        this.setState({
+          ckReplys: [],
+          totalCount:  0,
+          loading: false
+        });
+      }
+    })
+    console.log('获取列表拉拉', checkType)
   }
 
   topBar() {
@@ -897,9 +1061,6 @@ handleCloseCkReplyModal() {
             className="store_freight"
             value={search.inlandNumber}
             style={{ width: "200px" }}
-            onPressEnter={e => {
-              this.getCkNoSendOrderData();
-            }}
             onChange={e => {
               this.setState({
                 search: {
@@ -910,7 +1071,42 @@ handleCloseCkReplyModal() {
             }}
           />
         </div>
-        <div className="params params-20" style={{ minWidth: "170px" }}>
+        { search.type === "allOrder" ? <div className="params params-20" style={{ minWidth: "200px" }}>
+          <span>目的国家：</span>
+          <Input
+            placeholder="目的国家"
+            className="store_freight"
+            value={search.objectiveCountry}
+            style={{ width: "200px" }}
+            onChange={e => {
+              this.setState({
+                search: {
+                  ...search,
+                  objectiveCountry: e.target.value
+                } 
+              });
+            }}
+          />
+        </div> : null}
+        {search.type === "allOrder" ? <div className="params params-20" style={{ minWidth: "200px" }}>
+          <span>承运商：</span>
+          <Input
+            placeholder="承运商"
+            className="store_freight"
+            value={search.carrier}
+            style={{ width: "200px" }}
+            onChange={e => {
+              this.setState({
+                search: {
+                  ...search,
+                  carrier: e.target.value
+                } 
+              });
+            }}
+          />
+        </div> : null}
+        
+        {search.type === "ckProblemOrder" ? <div className="params params-20" style={{ minWidth: "170px" }}>
           <span>问题原因：</span>
           <Select
             value={search.problemCause || "选择问题原因"}
@@ -931,7 +1127,8 @@ handleCloseCkReplyModal() {
               );
             })}
           </Select>
-        </div>
+        </div> : null}
+        
         <div className="params" style={{ marginRight: "60px" }}>
           <Button
             className="search-btn"
@@ -948,7 +1145,7 @@ handleCloseCkReplyModal() {
 
   handleCkReply() {//仓库管理员回复
     const { ckReplyFormData } = this.state;
-    const params = { waybillNumber: ckReplyFormData.inclandNumber, type: "ckReply" };
+    const params = { waybillNumber: ckReplyFormData.inlandNumber, type: "ckReply" };
     if(ckReplyFormData.remark) {
       params.remark = ckReplyFormData.remark
     }
@@ -961,8 +1158,6 @@ handleCloseCkReplyModal() {
         ckReplyFormData: {}
       })
     })
-    
-    console.log('仓库管理员回复', ckReplyFormData)
   }
 
   getOrders() {
@@ -998,6 +1193,7 @@ handleCloseCkReplyModal() {
         {this.checkModal()}
         {this.sendOrderModal()}
         {this.ckReplyModal()}
+        {this.ckReplyCheckModal()}
       </div>
     );
   }
