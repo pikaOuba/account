@@ -1,0 +1,161 @@
+.admin {
+  position: relative;
+
+  .admin_action {
+    margin: 0 6px;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  .add_btns {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+
+  .add_btn {
+    height: 30px;
+    line-height: 30px;
+    border-color: $minColor;
+    background-color: $minColor;
+    color: #fff;
+    cursor: pointer;
+
+    span {
+      color: #fff;
+    }
+  }
+
+  .add_btn:hover,
+  .add_btn:focus {
+    color: #16b8be;
+    border-color: #16b8be;
+
+    span {
+      color: #16b8be;
+    }
+  }
+}
+
+.admin_modal {
+  .ant-modal-body {
+    padding: 50px 0;
+  }
+
+  button {
+    height: 28px;
+    line-height: 28px;
+  }
+
+  .add_btn {
+    border-color: $minColor;
+    background-color: $minColor;
+    margin-right: 12px;
+
+    span {
+      color: #fff;
+    }
+  }
+}
+
+.admin_power_modal.column {
+  .ant-modal-body {
+    padding: 0 20px 20px;
+
+    .user_msg {
+      margin: 16px 0;
+    }
+
+    .ant-tabs {
+      margin: 0;
+
+      .ant-tabs-nav-container {
+        .ant-tabs-ink-bar {
+          background-color: $minColor;
+        }
+
+        .ant-tabs-tab-active,
+        .ant-tabs-tab:hover {
+          color: $minColor;
+        }
+      }
+
+      .ant-tabs {
+        border: 1px solid #e9e9e9;
+        min-height: 244px;
+
+        .ant-tabs-bar {
+          height: 32px;
+          margin: 0;
+          background: #f8f8f8;
+
+          .ant-tabs-nav {
+            height: 32px;
+          }
+        }
+
+        .ant-tabs-tabpane {
+          padding: 12px;
+        }
+      }
+
+      .ant-tabs.ant-tabs-card>.ant-tabs-bar .ant-tabs-nav-container {
+        height: 32px;
+      }
+    }
+  }
+
+  .modal_title {
+    font-size: 12px;
+    color: #888;
+    text-align: left;
+  }
+
+  .ant-tabs.ant-tabs-card>.ant-tabs-bar .ant-tabs-tab {
+    border-radius: 0;
+  }
+}
+
+.reset_pass {
+  .ant-modal-body {
+    padding: 40px 20px;
+  }
+}
+
+.ant-pagination-next .ant-pagination-item-link:after,
+.ant-pagination-prev .ant-pagination-item-link:after {
+  height: 22px;
+}
+
+.ant-pagination-options {
+  vertical-align: text-top;
+
+  .ant-select-selection__rendered {
+    line-height: 22px;
+  }
+
+  .ant-pagination-options-quick-jumper {
+    line-height: 22px;
+  }
+
+  .ant-select-selection--single {
+    height: 24px;
+  }
+}
+
+.ant-pagination-item-active a,
+.ant-pagination-item:focus a,
+.ant-pagination-item:hover a {
+  color: #fff;
+}
+
+#root {
+
+  .ant-pagination-next:focus .ant-pagination-item-link,
+  .ant-pagination-next:hover .ant-pagination-item-link,
+  .ant-pagination-prev:focus .ant-pagination-item-link,
+  .ant-pagination-prev:hover .ant-pagination-item-link {
+    color: $minColor;
+    border-color: $minColor;
+  }
+}

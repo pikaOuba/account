@@ -1,0 +1,49 @@
+.search-title{
+  width:100%;
+  min-height:72px;
+  position:relative;
+  padding:20px 10px 0;
+  margin-bottom:10px;
+  background-color:#fff;
+  font-size: 14px;
+  .params{
+    float:left;
+    height:30px;
+    line-height:30px;
+    margin-bottom:12px;
+    &>.input{
+      display:inline-block;
+      position:relative;
+      i{
+        position:absolute;
+        right:10px;
+        top:50%;
+        margin-top:-6px;
+      }
+    }
+    .search-btn{
+      background-color:$minColor;
+      border:none;
+      span{
+        color:#fff;
+      }
+    }
+  }
+  .ant-radio-group{
+    .ant-radio-button-wrapper:last-child{
+      margin-left:-1px;
+    }
+  }
+  .params-20{
+    margin-right:20px;
+  }
+  .params-12{
+    margin-right:12px;
+  }
+  .params-4{
+    margin-right:4px;
+  }
+  .params-30{
+    margin-right:30px;
+  }
+}

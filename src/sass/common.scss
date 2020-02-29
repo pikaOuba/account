@@ -1,0 +1,137 @@
+body,
+h6,
+h5,
+h4,
+h3,
+h2,
+h1,
+ul,
+dl,
+dd,
+dt,
+p,
+input {
+  padding: 0;
+  margin: 0;
+  font-family: "PingFang SC", "Helvetica Neue For Number", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #222;
+}
+
+* {
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+}
+
+i,
+em,
+strong {
+  font-style: normal;
+  font-weight: normal;
+}
+
+.left {
+  float: left !important;
+}
+
+.right {
+  float: right !important;
+}
+
+ul {
+  list-style: none;
+}
+
+i,
+em {
+  font-style: normal;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/*label *{ pointer-events: none;}*/
+
+//设计base字体
+// $base-font-size: 75px;
+
+$minColor: #16b8be !default;
+$colorWhite: #fff !default;
+
+.colorMin {
+  color: $minColor
+}
+
+.bgColorMin {
+  background-color: $minColor
+}
+
+.borderColorMin {
+  border: 1px solid $minColor
+}
+
+//溢出显示省略号
+@mixin ell() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+//清除浮动
+$lte7: true;
+
+@mixin clearfix {
+  @if $lte7 {
+    *zoom: 1;
+  }
+
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+    font: 0/0 a;
+  }
+
+  &:after {
+    clear: both;
+  }
+}
+
+body {
+  background-color: #f7f7f7;
+  color: #222;
+}
+
+input,
+select {
+  outline: none;
+  color: #222;
+}
+
+input::-webkit-input-placeholder {
+  color: #696969 !important;
+}
+
+input:-moz-placeholder {
+  color: #696969 !important;
+}
+
+input:-moz-placeholder {
+  color: #696969 !important;
+}
+
+input:-ms-input-placeholder {
+  color: #696969 !important;
+}
+
+.ant-select-search__field__placeholder,
+.ant-select-selection__placeholder {
+  color: #a6a6a6;
+}

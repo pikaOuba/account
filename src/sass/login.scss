@@ -1,0 +1,208 @@
+#root .loginwarp {
+  //background:url('../image/loginbg.png');
+  color: #333;
+  background-color: #fff;
+  background-size: 100% 100%;
+  // position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  .logo {
+    height: .38rem;
+    text-align: center;
+    margin-bottom: .3rem;
+
+    img {
+      height: 100%;
+      vertical-align: inherit;
+    }
+  }
+
+  .container {
+    height: 100%;
+    left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+    // overflow: hidden;
+
+    .login {
+      position: absolute;
+      right: 4.6rem;
+      top: 189px;
+      width: 3.7rem;
+      padding: .5rem .26rem 1.12rem .26rem;
+      border-radius: 2px;
+      background-color: #fff;
+      box-shadow: 0 0 7px 3px #ebebeb;
+
+      .title {
+        text-align: center;
+        color: #222;
+        font-size: .24rem;
+        margin-bottom: .42rem;
+
+        img {
+          height: 100%;
+          vertical-align: inherit;
+        }
+      }
+
+      .ant-input-group-wrapper {
+        height: .4rem;
+        margin-bottom: 5px;
+        color: #666;
+        width: 100%;
+        background-color: #fff;
+        border: none;
+        outline: none;
+
+        .ant-input-group {
+          height: 100%;
+          width: 100%;
+
+          input {
+            height: 100%;
+            font-size: .16rem;
+          }
+
+          .ant-input-group-addon {
+            background-color: #fff;
+            padding-left: .12rem;
+            border-radius: 0;
+
+            img {
+              width: .16rem;
+              vertical-align: middle;
+            }
+
+            .anticon {
+              font-size: 16px;
+            }
+          }
+        }
+
+        .ant-input {
+          border-left: 0;
+          background-color: #fff;
+          padding-left: 5px;
+          border-radius: 0;
+        }
+
+        .ant-input:focus,
+        .ant-input:hover {
+          border-color: #d9d9d9;
+          box-shadow: none;
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+          -webkit-transition-delay: 99999s;
+          -webkit-transition: color 99999s ease-out, background-color 99999s ease-out;
+        }
+      }
+
+      .checked {
+        height: 26px;
+        line-height: 26px;
+
+        .ant-checkbox-wrapper {
+          font-size: 18px;
+
+          .ant-checkbox-inner {
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+
+      .err {
+        height: .38rem;
+        width: 100%;
+        border-radius: 4px;
+        border: 1px solid #e33012;
+        font-size: .16rem;
+        background-color: #ffedeb;
+        line-height: .38rem;
+        margin-bottom: 8px;
+        color: #e33012;
+        padding: 0 11px;
+
+        span {
+          color: #e33012;
+        }
+
+        .anticon {
+          margin-right: 14px;
+        }
+      }
+
+      button {
+        height: .42rem;
+        width: 100%;
+        background-color: $minColor;
+        border: none;
+        margin-top: .3rem;
+        font-size: .18rem;
+        border-radius: 0;
+
+        span {
+          color: #fff;
+
+        }
+      }
+
+      .bottom-font {
+        position: absolute;
+        bottom: .24rem;
+        width: 3.18rem;
+
+        img {
+          width: 1.24rem;
+          display: block;
+          margin: 0 auto;
+        }
+      }
+    }
+
+    .img {
+      position: absolute;
+      top: 189px;
+      left: 3.88rem;
+
+      .picture {
+        width: 2.1rem;
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      .word {
+        display: inline-block;
+        width: .32rem;
+        left: 3.26rem;
+        position: absolute;
+        top: .32rem;
+
+        .word1 {
+          width: 100%;
+        }
+
+        .seal {
+          width: .27rem;
+          margin-top: .1rem;
+        }
+      }
+
+      .word2 {
+        position: absolute;
+        left: 3.88rem;
+        width: .32rem;
+      }
+    }
+  }
+
+}

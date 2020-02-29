@@ -1,0 +1,32 @@
+.ant-layout-header {
+  padding: 0 !important;
+  height: 50px;
+  background: #fff !important;
+
+  .header {
+    height: 50px;
+    line-height: 50px;
+    background-color: #fff;
+    text-align: right;
+    padding-right: 50px;
+    font-size: .24rem;
+
+    .userInfo {
+      .header-logout {
+        display: inline-block;
+        padding-left: 10px;
+        position: relative;
+      }
+
+      .header-logout:before {
+        width: 1px;
+        height: 20px;
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 15px;
+        background-color: #ccc;
+      }
+    }
+  }
+}
