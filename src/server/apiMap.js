@@ -113,23 +113,23 @@ const apiList3 = {
 };
 
 if (!isDev) {
-  Object.keys(apiList1).map(key => {
+  Object.keys(apiList1).forEach(key => {
     apiList1[key].path = serverPath + apiList1[key].path;
   });
-  Object.keys(apiList2).map(key => {
+  Object.keys(apiList2).forEach(key => {
     apiList2[key].path = serverPath2 + apiList2[key].path;
   });
-  Object.keys(apiList3).map(key => {
+  Object.keys(apiList3).forEach(key => {
     apiList3[key].path = serverPath3;
   });
 } else {
-  Object.keys(apiList1).map(key => {
+  Object.keys(apiList1).forEach(key => {
     apiList1[key].path = "/server1" + apiList1[key].path;
   });
-  Object.keys(apiList2).map(key => {
+  Object.keys(apiList2).forEach(key => {
     apiList2[key].path = "/server2" + apiList2[key].path;
   });
-  Object.keys(apiList3).map(key => {
+  Object.keys(apiList3).forEach(key => {
     apiList3[key].path = serverPath3;
   });
 }

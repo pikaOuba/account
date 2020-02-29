@@ -3,7 +3,7 @@ import {
   Input,
   Button,
   Select,
-  Collapse,
+  // Collapse,
   Modal,
   Row,
   Col,
@@ -13,8 +13,11 @@ import {
 } from "antd";
 // 引入编辑器样式
 import { Api } from "../../server/_ajax";
-import $ from "jquery";
-import { apiList2, serverPath2 } from "../../server/apiMap";
+// import $ from "jquery";
+import { 
+  apiList2, 
+  // serverPath2
+} from "../../server/apiMap";
 import moment from "moment";
 const { TabPane } = Tabs;
 const api = new Api();
@@ -111,7 +114,7 @@ class MessageCenter extends Component {
         cateObj = {},
         sub = {};
       let list = res.categoryList || [];
-      list.map(a => {
+      list.forEach(a => {
         if (ary1.indexOf(a.cate) === -1) {
           ary1.push(a.cate);
           cateObj[a.id] = a.cate;
@@ -331,7 +334,7 @@ class MessageCenter extends Component {
             <Button
               onClick={() => {
                 let arr = [];
-                Object.keys(cateObject).map(id => {
+                Object.keys(cateObject).forEach(id => {
                   arr.push(cateObject[id]);
                 });
                 if (addCate === "" || !addCate) {

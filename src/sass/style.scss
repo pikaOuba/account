@@ -842,3 +842,68 @@ input:-webkit-autofill:active {
     display: none;
   }
 }
+
+// .ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+//   color: #fff;
+//   background: #16b8be;
+//   border-color: #16b8be;
+// }
+
+// .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):first-child {
+//   border-color: #16b8be;
+//   -webkit-box-shadow: none !important;
+//   box-shadow: none !important;
+// }
+// .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+//   z-index: 1;
+//   color: #16b8be;
+//   background: #fff;
+//   border-color: #16b8be;
+//   -webkit-box-shadow: -1px 0 0 0 #16b8be;
+//   box-shadow: -1px 0 0 0 #16b8be;
+// }
+
+// .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+//   z-index: 1;
+//   color: #16b8be;
+//   background: #fff;
+//   border-color: #16b8be;
+//   -webkit-box-shadow: -1px 0 0 0 #16b8be;
+//   box-shadow: -1px 0 0 0 #16b8be;
+// }
+// ::selection {
+//   color: #fff;
+//   background: #16b8be;
+// }
+
+// .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+//   z-index: 1;
+//   color: #16b8be;
+//   background: #fff;
+//   border-color: #16b8be;
+//   -webkit-box-shadow: -1px 0 0 0 #16b8be;
+//   box-shadow: -1px 0 0 0 #16b8be;
+// }
+// .ant-radio-button-wrapper-checked:first-child span {
+//   color: #fff;
+// }
+
+// .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+//   background-color: #16b8be !important;
+//   opacity: 0.1;
+// }
+// .ant-radio-button-wrapper .ant-radio-button-wrapper-checked:hover {
+//   background: #16b8be !important;
+//   border-color: #16b8be;
+//   color: #fff;
+// }
+
+// .ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+//   color: #fff;
+//   background: #16b8be;
+//   border-color: #16b8be;
+// }
+
+html {
+  --antd-wave-shadow-color: #16b8be;
+}

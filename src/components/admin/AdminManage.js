@@ -71,7 +71,7 @@ class AdminManage extends Component {
   }
 
   setColumn() {
-    const { formData } = this.state;
+    // const { formData } = this.state;
     const columns = [
       {
         title: "会员名称",
@@ -179,10 +179,10 @@ class AdminManage extends Component {
     var inputs = document.getElementsByClassName("input");
 
     for (var i = 0; i < inputs.length; i++) {
-      if (i == inputs.length - 1) {
+      if (i === inputs.length - 1) {
         inputs[0].focus();
         break;
-      } else if (e.target == inputs[i]) {
+      } else if (e.target === inputs[i]) {
         inputs[i + 1].focus();
         break;
       }
@@ -282,7 +282,7 @@ class AdminManage extends Component {
       }
     });
 
-    const { platform_id, kw, page_size, page_num } = this.state;
+    const {  kw, page_size, page_num } = this.state;
     let obj = { pageSize: page_size, pageIndex: page_num, key: kw };
 
     api.$post(apiList1.memberList.path, obj, res => {
@@ -463,7 +463,7 @@ class AdminManage extends Component {
   }
   /* 清除表单 */
   clearCreateForm() {
-    let { formData, platList } = this.state;
+    let { formData } = this.state;
     formData.user_id = "";
     formData.password = "";
     formData.password_status = "";

@@ -1,5 +1,5 @@
 import Cookies from "universal-cookie";
-import _ from "lodash";
+// import _ from "lodash";
 
 function setCookie(cname, cvalue, days = 3) {
   const cookies = new Cookies();

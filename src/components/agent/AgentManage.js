@@ -1,15 +1,17 @@
 import React, {Component} from 'react'
-import {Input,Select,Table,Button,Icon,Modal,Form,Col,Checkbox,Radio,Row,Tabs, Alert } from 'antd';
-import {Api} from '../.././server/_ajax.js'
+import {Input,Select,Table,Button,Modal,Form,Checkbox,Radio,Row, Alert,
+    // Icon,Col,Tabs,  
+} from 'antd';
+// import {Api} from '../.././server/_ajax.js'
 import edit_icon from '../../image/edit.svg'
 import lock_icon from '../../image/lock.svg'
 import user_icon from '../../image/juese.svg'
-const api = new Api();
+// const api = new Api();
 const Option = Select.Option;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-const CheckboxGroup = Checkbox.Group;
-const TabPane = Tabs.TabPane;
+// const CheckboxGroup = Checkbox.Group;
+// const TabPane = Tabs.TabPane;
 const formItemLayout = {
     labelCol: {span: 7},
     wrapperCol: {span: 14},
@@ -159,7 +161,7 @@ class AgentManage extends Component {
     }
 
     getUserDetail(user_id){
-        let {formData,platList} = this.state;
+        let {formData} = this.state;
         formData.isEdit = true;
         formData.user_id = user_id;
 

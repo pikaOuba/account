@@ -51,8 +51,8 @@ class MessageCreate extends Component {
     $("#show").click(function(e) {
       if (e.target.className) {
         if (
-          e.target.className == "show_content" ||
-          e.target.offsetParent.className == "show_content"
+          e.target.className === "show_content" ||
+          e.target.offsetParent.className === "show_content"
         ) {
           return;
         } else {
@@ -64,7 +64,7 @@ class MessageCreate extends Component {
         if (
           e.target.offsetParent &&
           e.target.offsetParent.className &&
-          e.target.offsetParent.className == "show_content"
+          e.target.offsetParent.className === "show_content"
         ) {
           return;
         } else {
@@ -80,7 +80,7 @@ class MessageCreate extends Component {
       let ary1 = [],
         sub = {};
       let cateList = res.categoryList || [];
-      cateList.map(a => {
+      cateList.forEach(a => {
         if (ary1.indexOf(a.cate) === -1) {
           ary1.push(a.cate);
         }
@@ -103,7 +103,7 @@ class MessageCreate extends Component {
   textSave = () => {
     let { cate, description, title, subCate, id } = this.state;
     let content = this.state.editorState.toHTML();
-    if (title.length == 0) {
+    if (title.length === 0) {
       this.setState({
         isSave: false
       });
@@ -113,7 +113,7 @@ class MessageCreate extends Component {
       });
       return;
     }
-    if (content == "") {
+    if (content === "") {
       this.setState({
         isSave: false
       });
@@ -162,7 +162,7 @@ class MessageCreate extends Component {
   };
 
   showBtn = () => {
-    let { islook, isSave } = this.state;
+    let { islook } = this.state;
 
     return !islook ? (
       <div style={{ display: "inline-block" }}>
@@ -276,7 +276,7 @@ class MessageCreate extends Component {
       subCate,
       description,
       islook,
-      isSave,
+      // isSave,
       subCateObj,
       title
     } = this.state;

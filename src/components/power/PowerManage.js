@@ -7,19 +7,19 @@ import {
   Icon,
   Modal,
   Form,
-  Checkbox,
-  Tabs,
+  // Checkbox,
+  // Tabs,
   Alert
 } from "antd";
-import { Api } from "../.././server/_ajax.js";
+// import { Api } from "../.././server/_ajax.js";
 import edit_icon from "../../image/edit.svg";
 import look_icon from "../../image/look.svg";
 import delete_icon from "../../image/delete.svg";
-const TabPane = Tabs.TabPane;
+// const TabPane = Tabs.TabPane;
 const Option = Select.Option;
-const CheckboxGroup = Checkbox.Group;
+// const CheckboxGroup = Checkbox.Group;
 const FormItem = Form.Item;
-const api = new Api();
+// const api = new Api();
 const formItemLayout = {
   labelCol: { span: 7 },
   wrapperCol: { span: 14 }

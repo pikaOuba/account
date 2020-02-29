@@ -11,11 +11,11 @@ import {
   Alert,
   Select
 } from "antd";
-import { Api } from "../.././server/_ajax.js";
-import dateformat from "dateformat-util";
-import edit_icon from "../../image/edit.svg";
-import delete_icon from "../../image/delete.svg";
-const api = new Api();
+// import { Api } from "../.././server/_ajax.js";
+// import dateformat from "dateformat-util";
+// import edit_icon from "../../image/edit.svg";
+// import delete_icon from "../../image/delete.svg";
+// const api = new Api();
 const FormItem = Form.Item;
 const reason = ["颜色不对", "尺寸不对", "数量不对", "其他"];
 

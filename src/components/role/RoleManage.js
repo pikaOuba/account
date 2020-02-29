@@ -7,22 +7,22 @@ import {
   Icon,
   Modal,
   Form,
-  Col,
+  // Col,
   Checkbox,
-  Radio,
-  Row,
-  Tabs,
+  // Radio,
+  // Row,
+  // Tabs,
   Alert
 } from "antd";
-import { Api } from "../.././server/_ajax.js";
+// import { Api } from "../.././server/_ajax.js";
 import edit_icon from "../../image/edit.svg";
 import look_icon from "../../image/look.svg";
 import delete_icon from "../../image/delete.svg";
-const TabPane = Tabs.TabPane;
+// const TabPane = Tabs.TabPane;
 const CheckboxGroup = Checkbox.Group;
 const FormItem = Form.Item;
 const Option = Select.Option;
-const api = new Api();
+// const api = new Api();
 const formItemLayout = {
   labelCol: { span: 5 },
   wrapperCol: { span: 16 }
@@ -160,7 +160,7 @@ class RoleManage extends Component {
     );
   }
   setColumn() {
-    const { formData } = this.state;
+    // const { formData } = this.state;
     const columns = [
       {
         title: "序号",
@@ -238,7 +238,7 @@ class RoleManage extends Component {
             ary2 = [];
 
           if (ary.length > 0) {
-            ary.map(a => {
+            ary.forEach(a => {
               ary2.push(a.permission_name);
             });
           }
@@ -407,9 +407,9 @@ class RoleManage extends Component {
       isAdd,
       role_flag,
       role_name,
-      permissionsList,
-      platform_id,
-      role_id
+      // permissionsList,
+      // platform_id,
+      // role_id
     } = this.state;
 
     if (!role_name) {
@@ -440,7 +440,7 @@ class RoleManage extends Component {
     }
     if (isAdd) {
       /*创建新用户*/
-      let permission_ids = permissionsList.join(",");
+      // let permission_ids = permissionsList.join(",");
       /*  api.$post(  '/api/account/create_role/',{permission_ids,platform_id,role_name,role_flag},(res)=>{
                 if (!res.errmsg){
                     this.setState({
@@ -467,7 +467,7 @@ class RoleManage extends Component {
                 }
             }) */
     } else {
-      let permission_ids = permissionsList.join(",");
+      // let permission_ids = permissionsList.join(",");
       /*  api.$post(  '/api/account/role_detail/',{permission_ids,platform_id,role_name,role_flag,role_id},(res)=>{
                 if (!res.errmsg){
                     this.setState({

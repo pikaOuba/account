@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import createBrowserHistory from "history/createBrowserHistory";
-import { login, search } from "../actions";
-import { Input } from "antd";
-import { Menu, Dropdown, Icon } from "antd";
+// import { login, search } from "../actions";
+// import { Input } from "antd";
+import { Menu,
+  // Dropdown, Icon 
+} from "antd";
 import { clearCookie } from "../server/cookies";
 const history = createBrowserHistory();
 
@@ -70,18 +72,18 @@ class Header extends Component {
   render() {
     const { user } = this.props;
 
-    const menu = (
-      <Menu>
-        <Menu.Item
-          key="0"
-          onClick={e => {
-            console.log(e);
-          }}
-        >
-          密码重置
-        </Menu.Item>
-      </Menu>
-    );
+    // const menu = (
+    //   <Menu>
+    //     <Menu.Item
+    //       key="0"
+    //       onClick={e => {
+    //         console.log(e);
+    //       }}
+    //     >
+    //       密码重置
+    //     </Menu.Item>
+    //   </Menu>
+    // );
     return (
       <div className="header bgColorGray">
         <div className="topbarCont">

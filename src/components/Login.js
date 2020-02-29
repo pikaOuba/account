@@ -2,8 +2,8 @@ import React, { Component } from "react";
 
 import { connect } from "react-redux";
 
-import $ from "jquery";
-import { login } from "../actions";
+// import $ from "jquery";
+// import { login } from "../actions";
 import { Button, Input, Icon, Modal } from "antd";
 import loginfont from "../image/loginfont.svg";
 import picture from "../image/picture.png";
@@ -57,13 +57,13 @@ class Login extends Component {
   login() {
     const { username, password } = this.state;
 
-    if (username == "") {
+    if (username === "") {
       this.setState({
         errmsg: "请输入账户！"
       });
       return;
     }
-    if (password == "") {
+    if (password === "") {
       this.setState({
         errmsg: "请输入密码！"
       });

@@ -68,7 +68,7 @@ class Api {
         success && success((resp.data && resp.data) || resp);
       },
       error: function(xhr, status, err) {
-        if (status == "abort") return;
+        if (status === "abort") return;
         if (xhr.status === 401) {
           delete _this._locks[url];
           _this.ajaxError("登录过期，请重新登录！", error, true);
