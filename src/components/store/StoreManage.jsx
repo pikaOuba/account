@@ -61,7 +61,12 @@ class StoreManage extends Component {
         type: "allOrder"
       },
       checkFormData: {},
-      checkVisible: false
+      ckReplyFormData: {},
+      checkVisible: false,
+      ckSendOrderVisible: false,
+      ckReplyVisible:false,
+      ckSendOrderFormData: {//运单发货
+      }
     };
   }
 
@@ -172,7 +177,7 @@ class StoreManage extends Component {
         }}/>
       },
       {
-        title: "customs",
+        title: "海关",
         dataIndex: "customs",
         key: "customs"
       },
@@ -210,11 +215,6 @@ class StoreManage extends Component {
         >
           发货
         </span>
-        <span
-          style={{ cursor: "pointer", marginRight: "10px" }}
-        >
-          运单发货
-        </span>
       </div>
       }
     ];
@@ -251,6 +251,26 @@ class StoreManage extends Component {
         dataIndex: "orderTime",
         render: a=> moment(a).format("YYYY-MM-DD")
       },
+      { 
+        title: "操作",
+        key: "action",
+        width: 200,
+        render: a => <div>
+          <span
+          style={{ cursor: "pointer", marginRight: "10px" }}
+          onClick={()=> {
+            this.setState({
+              ckSendOrderVisible: true,
+              ckSendOrderFormData: {
+                inlandNumber: a.inlandNumber,
+              }
+            })
+          }}
+        >
+          运单发货
+        </span>
+      </div>
+      }
     ];
     this.setState({
       columns: ckAlreadySendColumn
@@ -284,6 +304,33 @@ class StoreManage extends Component {
         title: "问题原因",
         dataIndex: "problemCause",
         key: "problemCause",
+      },
+      { 
+        title: "操作",
+        key: "action",
+        width: 200,
+        render: a => <div>
+          <span
+          style={{ cursor: "pointer", marginRight: "10px" }}
+          onClick={()=>{
+            this.setState({
+              ckReplyVisible: true,
+              inlandNumber: a.inlandNumber,
+              ckReplyFormData: {
+                ...this.state.ckReplyFormData,
+                inlandNumber: a.inlandNumber,
+              }
+            });
+          }}
+        >
+          仓库回复
+        </span>
+        <span
+          style={{ cursor: "pointer", marginRight: "10px" }}
+        >
+          查看
+        </span>
+      </div>
       }
     ];
     this.setState({
@@ -468,14 +515,12 @@ class StoreManage extends Component {
         <Input placeholder="运单号"
                 className="input"
                 disabled={true}
-                onPressEnter={(e)=>this.focusNextInput(e)}
                 value={checkFormData.inlandNumber}
         />
     </FormItem>
     <FormItem {...formItemLayout} label={<span>物流名称</span>}>
         <Input placeholder="物流名称"
                 className="input"
-                onPressEnter={(e)=>this.focusNextInput(e)}
                 value={checkFormData.logisticsName}
                 onChange={(e)=>{
                   this.setState({
@@ -563,7 +608,6 @@ class StoreManage extends Component {
     <FormItem {...formItemLayout} label={<span>高度（cm)</span>}>
         <Input placeholder="高度"
                 className="input"
-                onPressEnter={(e)=>this.focusNextInput(e)}
                 value={checkFormData.goodshigh}
                 onChange={(e)=>{
                   this.setState({
@@ -612,8 +656,149 @@ class StoreManage extends Component {
   </Modal>
   }
 
-  sendOrderModal() {
-    
+  handleCloseSendOrderModal() {
+    this.setState({
+      ckSendOrderVisible: false,
+      ckSendOrderFormData: {}
+    });
+  }
+
+  sendOrderModal() {//运单发货
+    const { ckSendOrderFormData, noChoice } = this.state;
+    return  <Modal
+    title="运单发货"
+    wrapClassName="admin_modal column"
+    width={"520px"}
+    visible={this.state.ckSendOrderVisible}
+    onCancel={this.handleCloseSendOrderModal.bind(this)}
+    footer={
+      <div className="action">
+        <Button
+          style={{ backgroundColor: "transparent" }}
+          onClick={this.handleCloseSendOrderModal.bind(this)}
+        >
+          关闭
+        </Button>
+          <Button
+            className=" add_btn"
+          >
+            提交
+          </Button>
+      </div>
+    }
+  >
+    <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
+        <Input placeholder="运单号"
+                className="input"
+                disabled={true}
+                value={ckSendOrderFormData.inlandNumber}
+        />
+    </FormItem>
+    <FormItem {...formItemLayout} label={<span>目的国</span>}>
+        <Input placeholder="目的国"
+                className="input"
+                disabled={true}
+                value={ckSendOrderFormData.objectiveCountry}
+                onChange={(e)=>{
+                  this.setState({
+                    ckSendOrderFormData:{
+                      ...ckSendOrderFormData,
+                      ckSendOrderFormData: e.target.value
+                    }
+                  });
+                }}
+        />
+    </FormItem>
+    {noChoice ? (
+          <Alert
+            message={this.state.message}
+            type="error"
+            closable
+            showIcon={true}
+            // onClose={onClose}
+          />
+        ) : null}
+  </Modal>
+  }
+
+handleCloseCkReplyModal() {
+  this.setState({
+    ckReplyFormData: {},
+    ckReplyVisible: false,
+  });
+}
+
+  //仓库回复
+  ckReplyModal() {
+    const { ckReplyFormData, noChoice } = this.state;
+    return  <Modal
+    title="仓库回复"
+    wrapClassName="admin_modal column"
+    width={"520px"}
+    visible={this.state.ckReplyVisible}
+    onCancel={this.handleCloseCkReplyModal.bind(this)}
+    footer={
+      <div className="action">
+        <Button
+          style={{ backgroundColor: "transparent" }}
+          onCancel={this.handleCloseCkReplyModal.bind(this)}
+        >
+          关闭
+        </Button>
+          <Button
+            className=" add_btn"
+            onClick={this.handleCkReply.bind(this)}
+          >
+            提交
+          </Button>
+      </div>
+    }
+  >
+    <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
+        <Input placeholder="运单号"
+                className="input"
+                disabled={true}
+                value={ckReplyFormData.inlandNumber}
+        />
+    </FormItem>
+    <FormItem {...formItemLayout} label={<span>回复内容</span>}>
+        <Input placeholder="回复内容"
+                className="input"
+                value={ckReplyFormData.replyContent}
+                onChange={(e)=>{
+                  this.setState({
+                    ckReplyFormData:{
+                      ...ckReplyFormData,
+                      replyContent: e.target.value
+                    }
+                  });
+                }}
+        />
+    </FormItem>
+    <FormItem {...formItemLayout} label={<span>备注</span>}>
+        <Input placeholder="备注"
+                className="input"
+                value={ckReplyFormData.remark}
+                onChange={(e)=>{
+                  this.setState({
+                    ckReplyFormData:{
+                      ...ckReplyFormData,
+                      remark: e.target.value
+                    }
+                  });
+                }}
+        />
+    </FormItem>
+    {noChoice ? (
+          <Alert
+            message={this.state.message}
+            type="error"
+            closable
+            showIcon={true}
+            // onClose={onClose}
+          />
+        ) : null}
+  </Modal>
   }
 
   clearForm() {
@@ -645,14 +830,15 @@ class StoreManage extends Component {
       this.setCkAlreadySendColumn();
     }
     if(type === "ckProblemOrder") {
-
+      this.setCkProblemOrderColumn();
     }
     if(type === "ckUserReplyOrder") {
-
+      this.setCkUserReplyOrderColumn();
     }
     if(type === "ckUserNoReplyOrder") {
-
+      this.setCkUserNoReplyOrderColumn();
     }
+
     this.setState({
       search: {
         type,
@@ -760,9 +946,23 @@ class StoreManage extends Component {
     );
   }
 
-  handleStore() {
-    const { userId, inlandNumber, goodsStatus } = this.state;
-    console.log(userId, inlandNumber, goodsStatus);
+  handleCkReply() {//仓库管理员回复
+    const { ckReplyFormData } = this.state;
+    const params = { waybillNumber: ckReplyFormData.inclandNumber, type: "ckReply" };
+    if(ckReplyFormData.remark) {
+      params.remark = ckReplyFormData.remark
+    }
+    if(ckReplyFormData.replyContent) {
+      params.replyContent = ckReplyFormData.replyContent
+    }
+    api.$get(apiList3.getStoreOrders.path, params, res => {
+      this.setState({
+        ckReplyVisible: false,
+        ckReplyFormData: {}
+      })
+    })
+    
+    console.log('仓库管理员回复', ckReplyFormData)
   }
 
   getOrders() {
@@ -796,6 +996,8 @@ class StoreManage extends Component {
         </div>
         {this.addEditModal()}
         {this.checkModal()}
+        {this.sendOrderModal()}
+        {this.ckReplyModal()}
       </div>
     );
   }
