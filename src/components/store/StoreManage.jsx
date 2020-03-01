@@ -13,7 +13,6 @@ import {
   Upload,
   message
 } from "antd";
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from "moment";
 import { Api } from "../.././server/_ajax.js";
 import { objToArray } from "../.././server/objtoArray";
@@ -993,7 +992,7 @@ class StoreManage extends Component {
 
   getReplys() {
     const { checkType, inlandNumber } = this.state
-    const params = { waybillNumber: inlandNumber, type: "ckReplyCheck" };
+    const params = { waybillNumber: inlandNumber, type: "ckReplyCheck", checkType: "1" };
     const checkTypeMap = new Map([["全部","1"], ["用户和运管","2"], ["用户和仓管","3"], ["运管和仓管","4"]]);
     if(checkType) {
       params.checkType = checkTypeMap.get(checkType)
@@ -1196,6 +1195,19 @@ class StoreManage extends Component {
     reader.readAsDataURL(img);
   }
 
+  handleTableChange = pagination => {
+    const { current: pageIndex, pageSize } = pagination
+    this.setState({
+      search: {
+        ...this.state.search,
+        pageIndex,
+        pageSize
+      }
+    },() => {
+      this.getOrders();
+    })
+  }
+
   render() {
     return (
       <div className="admin plat">
@@ -1213,7 +1225,14 @@ class StoreManage extends Component {
             dataSource={this.state.storeOrders}
             bordered
             loading={this.state.loading}
-            pagination={false}
+            pagination={{
+              current: this.state.search.pageIndex,
+              pageSize: this.state.search.pageSize,
+              showQuickJumper: true,
+              showSizeChanger: true,
+              total: this.state.totalCount
+            }}
+            onChange={this.handleTableChange.bind(this)}
           />
         </div>
         {this.addEditModal()}
