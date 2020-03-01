@@ -85,30 +85,7 @@ const apiList2 = {
   }
 };
 const apiList3 = {
-  //获取仓库所有运单
-  getAllOrderList: {
-    type: "allOrder"
-  },
-  storeOperations: {
-    type: "ckOrderUpdate"
-  },
-  getCkNoSendOrders: {
-    type: "ckNoSend"
-  },
-  getCkAlreadySendOrders: {
-    type: "ckAlreadySendOrder"
-  },
-  getCkUserReplyOrders: {
-    type: "ckUserReplyOrder"
-  },
-  getCkUserNoReplyOrders: {
-    type: "ckUserNoReplyOrder"
-  },
-  getCkProblemOrders: {
-    type: "ckProblemOrder"
-  },
-  getStoreOrders : {//获取仓库管理订单
-
+  getOrders : {//获取订单
   }
 };
 

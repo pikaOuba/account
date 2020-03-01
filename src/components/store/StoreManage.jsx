@@ -3,21 +3,21 @@ import {
   Input,
   Table,
   Button,
-  Icon,
   Modal,
   Form,
   Menu,
-  Dropdown,
   Alert,
   Radio,
   DatePicker,
-  Select
+  Select,
+  Upload,
+  message
 } from "antd";
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from "moment";
 import { Api } from "../.././server/_ajax.js";
 import { objToArray } from "../.././server/objtoArray";
 import { apiList3 } from "../../server/apiMap.js";
-import $ from "jquery";
 
 const api = new Api();
 const FormItem = Form.Item;
@@ -53,7 +53,6 @@ class StoreManage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      storeList: [],
       reason: "",
       loading: false,
       userId: "",
@@ -64,9 +63,6 @@ class StoreManage extends Component {
       checked_status:"",
       noChoice: false,
       message: "",
-      freight_number: "",
-      order_number: "",
-      abnormal_order: "",
       operationTypeDesc :"",
       storeOrders: [],
       columns: [],
@@ -124,10 +120,9 @@ class StoreManage extends Component {
       params.inlandNumber = search.inlandNumber;
     }
     
-    api.$get(apiList3.getStoreOrders.path, params, res => {
+    api.$get(apiList3.getOrders.path, params, res => {
       if(res.code !== 500) {
         let list = objToArray(res) || [];
-        console.log('接口获取');
         this.setState({
           storeOrders: [...list],
           totalCount: res.totalCount || 0,
@@ -487,7 +482,6 @@ class StoreManage extends Component {
       return;
     }
     this.uploadOrder();
-    
   }
 
   uploadOrder() {
@@ -519,181 +513,190 @@ class StoreManage extends Component {
     if(checkFormData.problemCause) {
       params.goodshigh = checkFormData.problemCause;
     }
-    api.$get(apiList3.getStoreOrders.path, params, res => {
+    api.$get(apiList3.getOrders.path, params, res => {
       this.setState({
         checkVisible: false
       })
     })
   }
 
+  handleCloseCheckModal() {
+    this.setState({
+      checkVisible: false,
+      checkFormData: {}
+    });
+  }
+
   //仓库管理员检查
   checkModal() {
     const { checkFormData, noChoice, checked_status } = this.state;
-    return  <Modal
-    title="仓库员检查"
-    wrapClassName="admin_modal column"
-    width={"520px"}
-    visible={this.state.checkVisible}
-    onCancel={()=>{this.setState({checkVisible: false});}}
-    footer={
-      <div className="action">
-        <Button
-          style={{ backgroundColor: "transparent" }}
-        >
-          关闭
-        </Button>
+    return <Modal
+      title="仓库员检查"
+      wrapClassName="admin_modal column"
+      width={"520px"}
+      visible={this.state.checkVisible}
+      onCancel={this.handleCloseCheckModal.bind(this)}
+      footer={
+        <div className="action">
+          <Button
+            style={{ backgroundColor: "transparent" }}
+            onClick={this.handleCloseCheckModal.bind(this)}
+          >
+            关闭
+          </Button>
           <Button
             className=" add_btn"
-            onClick={this.handleSubmitCheck.bind(this)}
-          >
+            onClick={this.handleSubmitCheck.bind(this)}>
             确定
           </Button>
-      </div>
-    }
-  >
-    <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
-        <Input placeholder="运单号"
-                className="input"
-                disabled={true}
-                value={checkFormData.inlandNumber}
+        </div>
+      }>
+      <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
+        <Input
+          placeholder="运单号"
+          className="input"
+          disabled={true}
+          value={checkFormData.inlandNumber}
         />
-    </FormItem>
-    <FormItem {...formItemLayout} label={<span>物流名称</span>}>
-        <Input placeholder="物流名称"
-                className="input"
-                value={checkFormData.logisticsName}
-                onChange={(e)=>{
-                  this.setState({
-                    checkFormData:{
-                      ...checkFormData,
-                      logisticsName: e.target.value
-                    }
-                  });
-                }}
+      </FormItem>
+      <FormItem {...formItemLayout} label={<span>物流名称</span>}>
+        <Input 
+          placeholder="物流名称"
+          className="input"
+          value={checkFormData.logisticsName}
+          onChange={(e)=>{
+            this.setState({
+              checkFormData:{
+                ...checkFormData,
+                logisticsName: e.target.value
+              }
+            });
+          }}
         />
-    </FormItem>
-    <FormItem
-      {...formItemLayout}
-      label={
-        <span>
-          <i>*</i>是否有问题
-        </span>
-      }
-      validateStatus={checked_status}
-    >
-      <Select
-            value={checkFormData.problemTracking || "选择问题原因"}
-            style={{ width: 200 }}
-            onChange={val => {
+      </FormItem>
+      <FormItem
+        {...formItemLayout}
+        label={
+          <span>
+            <i>*</i>是否有问题
+          </span>
+        }
+        validateStatus={checked_status}>
+        <Select
+          value={checkFormData.problemTracking || "选择问题原因"}
+          style={{ width: 200 }}
+          onChange={val => {
+            this.setState({
+              checkFormData: {
+                ...checkFormData,
+                problemTracking: val
+              }
+            })
+          }}>
+          {problemReason.map(a => {
+            return (
+              <Select.Option value={a} key={a}>
+                {a}
+              </Select.Option>
+            );
+          })}
+        </Select>
+      </FormItem>
+      {this.state.checkFormData.problemTracking === "有问题" ? <>
+      <FormItem {...formItemLayout} label={<span>重量(kg)</span>}>
+        <Input placeholder="重量"
+            className="input"
+            value={checkFormData.goodsWeight}
+            onChange={(e)=>{
               this.setState({
                 checkFormData: {
                   ...checkFormData,
-                  problemTracking: val
+                  goodsWeight: e.target.value
                 }
-              })
-            }}
-          >
-            {problemReason.map(a => {
-              return (
-                <Select.Option value={a} key={a}>
-                  {a}
-                </Select.Option>
-              );
-            })}
-          </Select>
-    </FormItem>
-    {this.state.checkFormData.problemTracking === "有问题" ? <>
-    <FormItem {...formItemLayout} label={<span>重量(kg)</span>}>
-        <Input placeholder="重量"
-                className="input"
-                value={checkFormData.goodsWeight}
-                onChange={(e)=>{
-                  this.setState({
-                    checkFormData: {
-                      ...checkFormData,
-                      goodsWeight: e.target.value
-                    }
-                  });
-                }}
-        />
-    </FormItem>
-    <FormItem {...formItemLayout} label={<span>长度（cm)</span>}>
+              });
+            }}/>
+      </FormItem>
+      <FormItem {...formItemLayout} label={<span>长度（cm)</span>}>
         <Input placeholder="长度"
-                className="input"
-                value={checkFormData.googdsLong}
-                onChange={(e)=>{
-                  this.setState({
-                    checkFormData: {
-                      ...checkFormData,
-                      googdsLong: e.target.value
-                    }
-                  });
-                }}
-        />
-    </FormItem>
-    <FormItem {...formItemLayout} label={<span>宽度（cm)</span>}>
+          className="input"
+          value={checkFormData.googdsLong}
+          onChange={(e)=>{
+            this.setState({
+              checkFormData: {
+                ...checkFormData,
+                googdsLong: e.target.value
+              }
+            });
+          }}/>
+      </FormItem>
+      <FormItem {...formItemLayout} label={<span>宽度（cm)</span>}>
         <Input placeholder="宽度"
-                className="input"
-                value={checkFormData.goodsWeight}
-                onChange={(e)=>{
-                  this.setState({
-                    checkFormData: {
-                      ...checkFormData,
-                      goodsWeight: e.target.value
-                    }
-                  });
-                }}
-        />
-    </FormItem>
-    <FormItem {...formItemLayout} label={<span>高度（cm)</span>}>
+          className="input"
+          value={checkFormData.goodsWeight}
+          onChange={(e)=>{
+            this.setState({
+              checkFormData: {
+                ...checkFormData,
+                goodsWeight: e.target.value
+              }
+            });
+          }}/>
+      </FormItem>
+      <FormItem {...formItemLayout} label={<span>高度（cm)</span>}>
         <Input placeholder="高度"
-                className="input"
-                value={checkFormData.goodshigh}
-                onChange={(e)=>{
-                  this.setState({
-                    checkFormData: {
-                      ...checkFormData,
-                      goodsWeight: e.target.value
-                    }
-                  });
-                }}
-        />
-    </FormItem>
-    <FormItem
-      {...formItemLayout}
-      label={
-        <span>
-          问题原因
-        </span>
-      }
-      // validateStatus={reason_status}
-    >
-      <Select
-            value={"选择问题原因"}
-            style={{ width: 200 }}
-            onChange={val => {
-            }}
-          >
-            {reason.map(a => {
-              return (
-                <Select.Option value={a} key={a}>
-                  {a}
-                </Select.Option>
-              );
-            })}
-          </Select>
-    </FormItem>
-    </> : null}
-    {noChoice ? (
-          <Alert
+          className="input"
+          value={checkFormData.goodshigh}
+          onChange={(e)=>{
+            this.setState({
+              checkFormData: {
+                ...checkFormData,
+                goodsWeight: e.target.value
+              }
+            });
+          }}/>
+      </FormItem>
+      <FormItem
+        {...formItemLayout}
+        // validateStatus={reason_status}
+        label={
+          <span>
+            问题原因
+          </span>
+        }>
+        <Select
+          value={"选择问题原因"}
+          style={{ width: 200 }}
+          onChange={val => {
+          }}>
+          {reason.map(a => {
+            return (
+              <Select.Option value={a} key={a}>
+                {a}
+              </Select.Option>
+            );
+          })}
+        </Select>
+      </FormItem>
+      <FormItem
+        {...formItemLayout}
+        // validateStatus={reason_status}
+        label={
+          <span>
+            问题图片
+          </span>
+        }>
+        <ProblemImage/>
+      </FormItem>
+      
+      </> : null}
+      {noChoice ? <Alert
             message={this.state.message}
             type="error"
             closable
-            showIcon={true}
             // onClose={onClose}
-          />
-        ) : null}
-  </Modal>
+            showIcon={true}/> : null
+      }
+    </Modal>
   }
 
   handleCloseSendOrderModal() {
@@ -706,52 +709,50 @@ class StoreManage extends Component {
   sendOrderModal() {//运单发货
     const { ckSendOrderFormData, noChoice } = this.state;
     return  <Modal
-    title="运单发货"
-    wrapClassName="admin_modal column"
-    width={"520px"}
-    visible={this.state.ckSendOrderVisible}
-    onCancel={this.handleCloseSendOrderModal.bind(this)}
-    footer={
-      <div className="action">
-        <Button
-          style={{ backgroundColor: "transparent" }}
-          onClick={this.handleCloseSendOrderModal.bind(this)}
-        >
-          关闭
-        </Button>
+      title="运单发货"
+      wrapClassName="admin_modal column"
+      width={"520px"}
+      visible={this.state.ckSendOrderVisible}
+      onCancel={this.handleCloseSendOrderModal.bind(this)}
+      footer={
+        <div className="action">
           <Button
-            className=" add_btn"
-            onClick={this.handleSendOrderSubmit.bind(this)}
+            style={{ backgroundColor: "transparent" }}
+            onClick={this.handleCloseSendOrderModal.bind(this)}
           >
-            提交
+            关闭
           </Button>
-      </div>
-    }
-  >
-    <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
+            <Button
+              className=" add_btn"
+              onClick={this.handleSendOrderSubmit.bind(this)}
+            >
+              提交
+            </Button>
+        </div>
+      }>
+      <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
         <Input placeholder="运单号"
-                className="input"
-                disabled={true}
-                value={ckSendOrderFormData.inlandNumber}
+          className="input"
+          disabled={true}
+          value={ckSendOrderFormData.inlandNumber}
         />
-    </FormItem>
-    <FormItem {...formItemLayout} label={<span>目的国</span>}>
+      </FormItem>
+      <FormItem {...formItemLayout} label={<span>目的国</span>}>
         <Input placeholder="目的国"
-                className="input"
-                disabled={true}
-                value={ckSendOrderFormData.objectiveCountry}
-        />
-    </FormItem>
-    {noChoice ? (
-          <Alert
-            message={this.state.message}
-            type="error"
-            closable
-            showIcon={true}
-            // onClose={onClose}
-          />
-        ) : null}
-  </Modal>
+          className="input"
+          disabled={true}
+          value={ckSendOrderFormData.objectiveCountry}/>
+      </FormItem>
+      {noChoice ? (
+            <Alert
+              message={this.state.message}
+              type="error"
+              closable
+              showIcon={true}
+              // onClose={onClose}
+            />
+          ) : null}
+    </Modal>
   }
 
   handleCloseCkReplyModal() {
@@ -771,7 +772,7 @@ class StoreManage extends Component {
   //仓库回复
   ckReplyModal() {
     const { ckReplyFormData, noChoice } = this.state;
-    return  <Modal
+    return <Modal
       title="仓库回复"
       wrapClassName="admin_modal column"
       width={"520px"}
@@ -792,44 +793,43 @@ class StoreManage extends Component {
               提交
             </Button>
         </div>
-      }
-  >
-    <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
-        <Input placeholder="运单号"
-                className="input"
-                disabled={true}
-                value={ckReplyFormData.inlandNumber}
-        />
-    </FormItem>
-    <FormItem {...formItemLayout} label={<span>回复内容</span>}>
-        <Input placeholder="回复内容"
-                className="input"
-                value={ckReplyFormData.replyContent}
-                onChange={(e)=>{
-                  this.setState({
-                    ckReplyFormData:{
-                      ...ckReplyFormData,
-                      replyContent: e.target.value
-                    }
-                  });
-                }}
-        />
-    </FormItem>
-    <FormItem {...formItemLayout} label={<span>备注</span>}>
-        <Input placeholder="备注"
-                className="input"
-                value={ckReplyFormData.remark}
-                onChange={(e)=>{
-                  this.setState({
-                    ckReplyFormData:{
-                      ...ckReplyFormData,
-                      remark: e.target.value
-                    }
-                  });
-                }}
-        />
-    </FormItem>
-    {noChoice ? (
+      }>
+      <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
+          <Input placeholder="运单号"
+                  className="input"
+                  disabled={true}
+                  value={ckReplyFormData.inlandNumber}
+          />
+      </FormItem>
+      <FormItem {...formItemLayout} label={<span>回复内容</span>}>
+          <Input placeholder="回复内容"
+                  className="input"
+                  value={ckReplyFormData.replyContent}
+                  onChange={(e)=>{
+                    this.setState({
+                      ckReplyFormData:{
+                        ...ckReplyFormData,
+                        replyContent: e.target.value
+                      }
+                    });
+                  }}
+          />
+      </FormItem>
+      <FormItem {...formItemLayout} label={<span>备注</span>}>
+          <Input placeholder="备注"
+                  className="input"
+                  value={ckReplyFormData.remark}
+                  onChange={(e)=>{
+                    this.setState({
+                      ckReplyFormData:{
+                        ...ckReplyFormData,
+                        remark: e.target.value
+                      }
+                    });
+                  }}
+          />
+      </FormItem>
+      {noChoice ? (
           <Alert
             message={this.state.message}
             type="error"
@@ -843,73 +843,71 @@ class StoreManage extends Component {
 
   ckReplyCheckModal() {
     const { inlandNumber, noChoice, checkType } = this.state;
-    return  <Modal
-    title="仓库回复查看"
-    wrapClassName="admin_modal column"
-    width={"520px"}
-    visible={this.state.ckReplyCheckVisible}
-    onCancel={this.handleCloseCkReplyCheckModal.bind(this)}
-    footer={
-      <div className="action">
-        <Button
-          style={{ backgroundColor: "transparent" }}
-          onClick={this.handleCloseCkReplyCheckModal.bind(this)}
-        >
-          关闭
-        </Button>
-      </div>
-    }
-  >
-    <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
-        <Input placeholder="运单号"
-                className="input"
-                disabled={true}
-                value={inlandNumber}
-        />
-    </FormItem>
-    <FormItem
-      {...formItemLayout}
-      label={
-        <span>
-          查看类型
-        </span>
-      }
-      // validateStatus={checked_status}
-    >
-      <Select
-            value={checkType || "选择类型"}
-            style={{ width: 200 }}
-            onChange={val => {
-              this.setState({
-                checkType: val
-              }, () => {
-                this.getReplys(val);
-              })
-            }}
+    return <Modal
+      title="仓库回复查看"
+      wrapClassName="admin_modal column"
+      width={"520px"}
+      visible={this.state.ckReplyCheckVisible}
+      onCancel={this.handleCloseCkReplyCheckModal.bind(this)}
+      footer={
+        <div className="action">
+          <Button
+            style={{ backgroundColor: "transparent" }}
+            onClick={this.handleCloseCkReplyCheckModal.bind(this)}
           >
-            {checkTypes.map(a => {
-              return (
-                <Select.Option value={a} key={a}>
-                  {a}
-                </Select.Option>
-              );
-            })}
-          </Select>
-    </FormItem>
-    <Table
-      columns={replyColumns}
-      dataSource={this.state.ckReplys}
-      bordered
-      loading={this.state.loading}
-      pagination={{
-        current: 1,
-        pageSize: 10,
-        showQuickJumper: false,
-        showSizeChanger: false,
-        // total: this.state.totalCount
-      }}
-    />
-    {noChoice ? (
+            关闭
+          </Button>
+        </div>
+      }>
+      <FormItem {...formItemLayout} label={<span><i>*</i>运单号</span>}>
+        <Input placeholder="运单号"
+          className="input"
+          disabled={true}
+          value={inlandNumber}
+        />
+      </FormItem>
+      <FormItem
+        {...formItemLayout}
+        // validateStatus={checked_status}
+        label={
+          <span>
+            查看类型
+          </span>
+        }>
+        <Select
+          value={checkType || "选择类型"}
+          style={{ width: 200 }}
+          onChange={val => {
+            this.setState({
+              checkType: val
+            }, () => {
+              this.getReplys(val);
+            })
+          }}
+        >
+          {checkTypes.map(a => {
+            return (
+              <Select.Option value={a} key={a}>
+                {a}
+              </Select.Option>
+            );
+          })}
+        </Select>
+      </FormItem>
+      <Table
+        columns={replyColumns}
+        dataSource={this.state.ckReplys}
+        bordered
+        loading={this.state.loading}
+        pagination={{
+          current: 1,
+          pageSize: 10,
+          showQuickJumper: false,
+          showSizeChanger: false,
+          // total: this.state.totalCount
+        }}
+      />
+      {noChoice ? (
           <Alert
             message={this.state.message}
             type="error"
@@ -918,7 +916,7 @@ class StoreManage extends Component {
             // onClose={onClose}
           />
         ) : null}
-  </Modal>
+    </Modal>
   }
 
   clearForm() {
@@ -930,7 +928,7 @@ class StoreManage extends Component {
   handleModelOk() {
     const { inlandNumber, userId, goodsStatus } = this.state;
     const params = {inlandNumber, userId, type: "ckOrderUpdate", goodsStatus};
-    api.$get(apiList3.storeOperations.path, params , res => {
+    api.$get(apiList3.getOrders.path, params , res => {
         this.setState({
           addEditVisible: false
         });
@@ -949,7 +947,7 @@ class StoreManage extends Component {
       params.objectiveCountry = ckSendOrderFormData.objectiveCountry;
     }
     
-    api.$get(apiList3.storeOperations.path, params , res => {
+    api.$get(apiList3.getOrders.path, params , res => {
       this.setState({
         ckSendOrderVisible: false
       });
@@ -1000,7 +998,7 @@ class StoreManage extends Component {
     if(checkType) {
       params.checkType = checkTypeMap.get(checkType)
     }
-    api.$get(apiList3.getStoreOrders.path, params, res => {
+    api.$get(apiList3.getOrders.path, params, res => {
       if(res.code !== 500) {
         let list = objToArray(res) || [];
         this.setState({
@@ -1015,11 +1013,10 @@ class StoreManage extends Component {
           loading: false
         });
       }
-    })
-    console.log('获取列表拉拉', checkType)
+    });
   }
 
-  topBar() {
+  searchBar() {
     const { search } = this.state
     return (
       <div className="search-title" style={{ minWidth: "1170px" }}>
@@ -1152,7 +1149,7 @@ class StoreManage extends Component {
     if(ckReplyFormData.replyContent) {
       params.replyContent = ckReplyFormData.replyContent
     }
-    api.$get(apiList3.getStoreOrders.path, params, res => {
+    api.$get(apiList3.getOrders.path, params, res => {
       this.setState({
         ckReplyVisible: false,
         ckReplyFormData: {}
@@ -1180,7 +1177,7 @@ class StoreManage extends Component {
           frameBorder="0"
         />
         <div className="tableWarp">
-          {this.topBar()}
+          {this.searchBar()}
           <Table
             columns={this.state.columns}
             dataSource={this.state.storeOrders}
@@ -1195,6 +1192,63 @@ class StoreManage extends Component {
         {this.ckReplyModal()}
         {this.ckReplyCheckModal()}
       </div>
+    );
+  }
+}
+
+class ProblemImage extends React.Component {
+  state = {
+    loading: false,
+  };
+
+  getBase64(img, callback) {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+  }
+
+  beforeUpload(file) {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+      message.error('You can only upload JPG/PNG file!');
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      message.error('Image must smaller than 2MB!');
+    }
+    return isJpgOrPng && isLt2M;
+  }
+
+  handleChange = info => {
+    if (info.file.status === 'uploading') {
+      this.setState({ loading: true });
+      return;
+    }
+    if (info.file.status === 'done') {
+      // Get this url from response in real world.
+      this.getBase64(info.file.originFileObj, imageUrl =>
+        this.setState({
+          imageUrl,
+          loading: false,
+        }),
+      );
+    }
+  };
+
+  render() {
+    const { imageUrl } = this.state;
+    return (
+      <Upload
+        name="avatar"
+        listType="picture-card"
+        className="avatar-uploader"
+        showUploadList={false}
+        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+        beforeUpload={this.beforeUpload}
+        onChange={this.handleChange}
+      >
+        {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : '上传'}
+      </Upload>
     );
   }
 }
