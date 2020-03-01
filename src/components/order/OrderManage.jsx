@@ -334,7 +334,7 @@ class OrderManage extends Component {
     if (type === UNABLE_SEND_ORDER) {
       params.trackingSign = trackingSign;
     }
-    api.$get(apiList3.getAllOrderList.path, params, res => {
+    api.$get(apiList3.getOrders.path, params, res => {
       this.setColumn();
       if(res.code !== 500) {
         let list = objToArray(res) || [];
@@ -587,7 +587,7 @@ class OrderManage extends Component {
   }
 
   handleSubmit(params) {
-    api.$get(apiList3.getAllOrderList.path, params, res => {
+    api.$get(apiList3.getOrders.path, params, res => {
       this.setColumn();
       if(res.code !== 500) {
         let list = objToArray(res) || [];
