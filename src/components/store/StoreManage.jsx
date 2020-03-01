@@ -17,7 +17,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from "moment";
 import { Api } from "../.././server/_ajax.js";
 import { objToArray } from "../.././server/objtoArray";
-import { apiList3 } from "../../server/apiMap.js";
+import { apiList3, apiList2 } from "../../server/apiMap.js";
 
 const api = new Api();
 const FormItem = Form.Item;
@@ -119,7 +119,7 @@ class StoreManage extends Component {
     if(search.inlandNumber) {
       params.inlandNumber = search.inlandNumber;
     }
-    
+
     api.$get(apiList3.getOrders.path, params, res => {
       if(res.code !== 500) {
         let list = objToArray(res) || [];
@@ -1239,11 +1239,11 @@ class ProblemImage extends React.Component {
     const { imageUrl } = this.state;
     return (
       <Upload
-        name="avatar"
+        name="file"
         listType="picture-card"
         className="avatar-uploader"
         showUploadList={false}
-        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+        action={apiList2.uploadFile.path}
         beforeUpload={this.beforeUpload}
         onChange={this.handleChange}
       >
