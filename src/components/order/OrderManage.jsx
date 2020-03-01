@@ -8,7 +8,8 @@ import {
   Radio,
   Select,
   Form,
-  Alert
+  Alert,
+  message
 } from "antd";
 // 引入编辑器样式
 import { Api } from "../../server/_ajax";
@@ -353,7 +354,24 @@ class OrderManage extends Component {
 
   handleSearch() {
     this.setState({
-      loading: true
+      loading: true,
+      record: {},
+      addTagModalVisible: false,
+      addReplyModalVisible: false,
+      addSeereplyModalVisible: false,
+      noChoice: false,
+      message: '',
+      checked_status: 'error',
+      formData: {
+        inlandNumber: '',
+        trackingSign: '',
+        waybillNumber: '',
+        checkType: '',
+        userId: '',
+        replyContent: '',
+        remark: '',
+        replyPerson: '',
+      }
     });
     setTimeout(() => {
       this.getAllOrderColumn()
@@ -593,20 +611,11 @@ class OrderManage extends Component {
 
   handleSubmit(params) {
     api.$get(apiList3.getOrders.path, params, res => {
-      this.setColumn();
-      if(res.code !== 500) {
-        let list = objToArray(res) || [];
-        this.setState({
-          allOrderList: [...list],
-          totalCount: res.totalCount || 0,
-          loading: false
-        });
+      if(res.code === 200 && res.msg === 'success') {
+        message.success('操作成功！');
+        this.handleSearch()
       } else {
-        this.setState({
-          allOrderList: [],
-          totalCount:  0,
-          loading: false
-        });
+        message.error('操作失败！');
       }
     })
   }
