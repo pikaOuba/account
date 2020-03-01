@@ -685,7 +685,7 @@ class StoreManage extends Component {
             问题图片
           </span>
         }>
-        <ProblemImage/>
+        <ProblemImage onChange={this.onChange.bind(this)} imageUrl={this.state.checkFormData.imageUrl}/>
       </FormItem>
       
       </> : null}
@@ -1166,6 +1166,36 @@ class StoreManage extends Component {
     }, 500);
   }
 
+  onChange(info) {
+    if (info.file.status === 'uploading') {
+      this.setState({ loading: true });
+      return;
+    }
+    if (info.file.status === 'done') {
+      // Get this url from response in real world.
+      this.getBase64(info.file.originFileObj, imageUrl =>
+        this.setState({
+          checkFormData: {
+            ...this.state.checkFormData,
+            imageUrl,
+            problemOrderImg: `${uploadServerPath}${info.fileList[0].response.path}`
+          }
+          ,
+          loading: false,
+        }),
+      );
+    }
+    if (info.file.status === 'error') {
+      message.error(`${info.file.name} 上传失败`);
+    }
+  }
+
+  getBase64(img, callback) {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+  }
+
   render() {
     return (
       <div className="admin plat">
@@ -1201,11 +1231,7 @@ class ProblemImage extends React.Component {
     loading: false,
   };
 
-  getBase64(img, callback) {
-    const reader = new FileReader();
-    reader.addEventListener('load', () => callback(reader.result));
-    reader.readAsDataURL(img);
-  }
+
 
   beforeUpload(file) {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
@@ -1220,29 +1246,14 @@ class ProblemImage extends React.Component {
   }
 
   handleChange = info => {
-    if (info.file.status === 'uploading') {
-      this.setState({ loading: true });
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      this.getBase64(info.file.originFileObj, imageUrl =>
-        this.setState({
-          imageUrl,
-          loading: false,
-        }),
-      );
-
-      console.log(`这是后台返回的图片地址------   ${info.fileList[0].response.path}`)
-      console.log(`拼装后地址------   ${uploadServerPath}${info.fileList[0].response.path}`)
-    }
-    if (info.file.status === 'error') {
-      message.error(`${info.file.name} 上传失败`);
+    const { onChange } = this.props;
+    if(onChange) {
+      onChange(info)
     }
   };
 
   render() {
-    const { imageUrl } = this.state;
+    const { imageUrl } = this.props;
     return (
       <Upload
         name="file"
