@@ -17,7 +17,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from "moment";
 import { Api } from "../.././server/_ajax.js";
 import { objToArray } from "../.././server/objtoArray";
-import { apiList3, apiList2 } from "../../server/apiMap.js";
+import { apiList3, apiList4, uploadServerPath } from "../../server/apiMap.js";
 
 const api = new Api();
 const FormItem = Form.Item;
@@ -1232,6 +1232,12 @@ class ProblemImage extends React.Component {
           loading: false,
         }),
       );
+
+      console.log(`这是后台返回的图片地址------   ${info.fileList[0].response.path}`)
+      console.log(`拼装后地址------   ${uploadServerPath}${info.fileList[0].response.path}`)
+    }
+    if (info.file.status === 'error') {
+      message.error(`${info.file.name} 上传失败`);
     }
   };
 
@@ -1243,7 +1249,7 @@ class ProblemImage extends React.Component {
         listType="picture-card"
         className="avatar-uploader"
         showUploadList={false}
-        action={apiList2.uploadFile.path}
+        action={apiList4.uploadFile.path}
         beforeUpload={this.beforeUpload}
         onChange={this.handleChange}
       >

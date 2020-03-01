@@ -3,6 +3,8 @@ const serverPath = "https://company.cnshanzhi.com:8005/";
 // const serverPath2 = "https://news.cnshanzhi.com";
 const serverPath2 = "https://company.cnshanzhi.com";
 const serverPath3 = "http://jiekou.4980.cn/action.php";
+const serverPath4 = "http://jiekou.4980.cn/upload.php";
+let uploadServerPath = "http://jiekou.4980.cn/";
 
 const isDev = process.env.NODE_ENV === "development";
 const apiList1 = {
@@ -89,6 +91,13 @@ const apiList3 = {
   }
 };
 
+const apiList4 = {
+  //上传图片视频
+  uploadFile: {
+    path: ""
+  },
+}
+
 if (!isDev) {
   Object.keys(apiList1).forEach(key => {
     apiList1[key].path = serverPath + apiList1[key].path;
@@ -99,6 +108,10 @@ if (!isDev) {
   Object.keys(apiList3).forEach(key => {
     apiList3[key].path = serverPath3;
   });
+  Object.keys(apiList4).forEach(key => {
+    apiList4[key].path = serverPath4 + apiList4[key].path;
+  });
+  uploadServerPath = serverPath2; // 正式环境图片上传后拼接地址
 } else {
   Object.keys(apiList1).forEach(key => {
     apiList1[key].path = "/server1" + apiList1[key].path;
@@ -109,5 +122,9 @@ if (!isDev) {
   Object.keys(apiList3).forEach(key => {
     apiList3[key].path = serverPath3;
   });
+  Object.keys(apiList4).forEach(key => {
+    apiList4[key].path = "/server4" + apiList4[key].path;
+  });
+  uploadServerPath = "http://jiekou.4980.cn/";
 }
-export { apiList1, apiList2, apiList3, serverPath2 };
+export { apiList1, apiList2, apiList3, apiList4, serverPath2, serverPath4, uploadServerPath };

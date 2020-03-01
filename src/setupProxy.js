@@ -30,5 +30,14 @@ module.exports = function(app) {
       }
     })
   );
+  app.use(
+    proxy("/server4", {
+      target: "http://jiekou.4980.cn/upload.php",
+      changeOrigin: true,
+      pathRewrite: {
+        "^/server4": "" //路径重写
+      }
+    })
+  );
   
 };
