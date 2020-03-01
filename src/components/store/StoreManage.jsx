@@ -22,7 +22,7 @@ const api = new Api();
 const FormItem = Form.Item;
 const dateFormat = "YYYY-MM-DD";
 const { RangePicker } = DatePicker;
-const reason = ["颜色不对", "破损", "尺寸不对"];
+const reason = ["颜色不对", "尺寸不对", "破损"];
 const problemReason = ["有问题", "没问题", "无法发货"];
 const checkTypes = ["全部","用户和运管","用户和仓管", "运管和仓管"]
 const formItemLayout = {
@@ -485,6 +485,7 @@ class StoreManage extends Component {
 
   uploadOrder() {
     const problemTrackingMap = new Map([["有问题","1"],["没问题", "-1"], ["无法发货","2"]]);
+    const problemCauseMap = new Map([["颜色不对","1"],["尺寸不对", "2"], ["破损","3"]]);
     const { checkFormData } = this.state;
     let params = { 
       type: "ckOrderUpdate",
@@ -510,7 +511,7 @@ class StoreManage extends Component {
       params.problemOrderImg = checkFormData.problemOrderImg;
     }
     if(checkFormData.problemCause) {
-      params.goodshigh = checkFormData.problemCause;
+      params.problemCause = problemCauseMap.get(checkFormData.problemCause);
     }
     api.$get(apiList3.getOrders.path, params, res => {
       this.setState({
@@ -631,12 +632,12 @@ class StoreManage extends Component {
       <FormItem {...formItemLayout} label={<span>宽度（cm)</span>}>
         <Input placeholder="宽度"
           className="input"
-          value={checkFormData.goodsWeight}
+          value={checkFormData.googdsWide}
           onChange={(e)=>{
             this.setState({
               checkFormData: {
                 ...checkFormData,
-                goodsWeight: e.target.value
+                googdsWide: e.target.value
               }
             });
           }}/>
@@ -649,7 +650,7 @@ class StoreManage extends Component {
             this.setState({
               checkFormData: {
                 ...checkFormData,
-                goodsWeight: e.target.value
+                goodshigh: e.target.value
               }
             });
           }}/>
@@ -663,9 +664,15 @@ class StoreManage extends Component {
           </span>
         }>
         <Select
-          value={"选择问题原因"}
+          value={checkFormData.problemCause || "选择问题原因"}
           style={{ width: 200 }}
           onChange={val => {
+            this.setState({
+              checkFormData: {
+                ...checkFormData,
+                problemCause: val
+              }
+            })
           }}>
           {reason.map(a => {
             return (
