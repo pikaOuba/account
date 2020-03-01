@@ -187,7 +187,7 @@ class OrderManage extends Component {
     this.state = {
       loading: true,
       totalCount: 0,
-      currentPage: 1,
+      pageIndex: 1,
       pageSize: 10,
       locale: {
         emptyText: "没有相关数据"
@@ -202,9 +202,7 @@ class OrderManage extends Component {
         startTime: null,
         endTime: null,
         objectiveCountry: null,
-        carrier: null, 
-        pageIndex: 1,
-        pageSize: 10,
+        carrier: null,
         TrackingState: null, // 发货状态
         problemCause: null,  // 问题原因
         trackingSign: null,  // 运单状态
@@ -303,9 +301,9 @@ class OrderManage extends Component {
   }
 
   getAllOrderColumn() {
-    const { allOrderListSearch = {} } = this.state;
+    const { pageSize, pageIndex, allOrderListSearch = {} } = this.state;
     const {
-      pageSize, pageIndex, type, startTime, 
+      type, startTime, 
       endTime, carrier, objectiveCountry, 
       TrackingState,  problemCause, trackingSign
     } = allOrderListSearch
@@ -363,9 +361,9 @@ class OrderManage extends Component {
   }
 
   handleTableChange = pagination => {
-    const { current: currentPage, pageSize } = pagination
+    const { current: pageIndex, pageSize } = pagination
     this.setState({
-      currentPage,
+      pageIndex,
       pageSize
     },() => {
       this.handleSearch()
@@ -533,7 +531,14 @@ class OrderManage extends Component {
           <Button
             className="search-btn"
             onClick={() => {
-              this.handleSearch();
+              this.setState(
+                {
+                  pageIndex: 1,
+                  pageSize: this.state.pageSize,
+                },
+                () => {
+                  this.handleSearch();
+                })
             }}
           >
             查询
@@ -550,14 +555,14 @@ class OrderManage extends Component {
               const {allOrderListSearch: {type}} = this.state
               this.setState(
                 {
+                  pageIndex: 1,
+                  pageSize: 10,
                   allOrderListSearch: {
                     inlandNumber: null, // 运单号
                     startTime: null,
                     endTime: null,
                     objectiveCountry: null,
-                    carrier: null, 
-                    pageIndex: 1,
-                    pageSize: 10,
+                    carrier: null,
                     TrackingState: null, // 发货状态
                     problemCause: null,  // 问题原因
                     trackingSign: null,  // 运单状态
@@ -723,7 +728,7 @@ class OrderManage extends Component {
               loading={this.state.loading}
               locale={this.state.locale}
               pagination={{
-                current: this.state.currentPage,
+                current: this.state.pageIndex,
                 pageSize: this.state.pageSize,
                 showQuickJumper: true,
                 showSizeChanger: true,
