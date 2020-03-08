@@ -14,13 +14,14 @@ class Api {
     this._locks = {};
   }
 
-  $get(url, data, success, error) {
-    return this.$ajax("GET", url, data, success, error);
+  $get(url, data, success, error, isReturnAll) {
+    return this.$ajax("GET", url, data, success, error, null, isReturnAll);
   }
 
   $post(url, data, success, error) {
     return this.$ajax("POST", url, data, success, error);
   }
+
   $postJSON(url, data, success, error) {
     return this.$ajax(
       "POST",
@@ -36,7 +37,7 @@ class Api {
     return this.$ajax("DELETE", url, data, success, error);
   }
 
-  $ajax(method, url, data, success, error, contentType) {
+  $ajax(method, url, data, success, error, contentType, isReturnAll) {
     let _this = this;
 
     this._locks[url] = 1;
@@ -64,8 +65,11 @@ class Api {
       success: function(resp /* status*/ /*, xhr*/) {
         delete _this._locks[url];
         resp = resp ? resp : {};
-
-        success && success((resp.data && resp.data) || resp);
+        if(isReturnAll) {
+          success && success(resp);
+        } else {
+          success && success((resp.data && resp.data) || resp);
+        }
       },
       error: function(xhr, status, err) {
         if (status === "abort") return;

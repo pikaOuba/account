@@ -26,7 +26,7 @@ module.exports = function(app) {
       target: "https://company.cnshanzhi.com",
       changeOrigin: true,
       pathRewrite: {
-        "^/server3": "http://jiekou.4980.cn/action.php" //路径重写
+        "^/server3": "http://jiekou.4980.cn/" //路径重写
       }
     })
   );
@@ -42,7 +42,7 @@ module.exports = function(app) {
   // 请求4PX接口
   app.use(
     proxy("/order_imgApi", {
-      target: "http://jiekou.4980.cn/imgApi.php",
+      target: "http://jiekou.4980.cn/4pxImgApi.php",
       changeOrigin: true,
       pathRewrite: {
         "^/order_imgApi": ""
@@ -88,5 +88,4 @@ module.exports = function(app) {
       }
     })
   );
-  
 };

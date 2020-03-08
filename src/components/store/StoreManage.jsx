@@ -5,26 +5,26 @@ import {
   Button,
   Modal,
   Form,
-  Menu,
   Alert,
-  Radio,
   DatePicker,
   Select,
   Upload,
-  message
+  message,
 } from "antd";
 import moment from "moment";
+import $ from "jquery";
 import { Api } from "../.././server/_ajax.js";
 import { objToArray } from "../.././server/objtoArray";
 import { apiList3, apiList4, uploadServerPath } from "../../server/apiMap.js";
-
+import OrderSearchBar from "../OrderSearchBar.js";
+import ReactToPrint from "react-to-print";
+var atob = require('atob');
+window.atob = atob;
 const api = new Api();
 const FormItem = Form.Item;
-const dateFormat = "YYYY-MM-DD";
-const { RangePicker } = DatePicker;
 const reason = ["颜色不对", "尺寸不对", "破损"];
 const problemReason = ["有问题", "没问题", "无法发货"];
-const checkTypes = ["全部","用户和运管","用户和仓管", "运管和仓管"]
+const checkTypes = ["全部","用户和运管","用户和仓管", "运管和仓管"];
 const formItemLayout = {
   labelCol: { span: 7 },
   wrapperCol: { span: 14 }
@@ -73,7 +73,12 @@ class StoreManage extends Component {
         pageIndex: 1,
         pageSize: 10,
         problemCause: "",
-        type: "allOrder"
+        trackingSign: "",
+        fhStatus: "",
+        hasProblem: "",
+        userReply:"",
+        placeName: "",
+        type: "ckAllOrder"
       },
       checkFormData: {},
       ckReplyFormData: {},
@@ -84,6 +89,10 @@ class StoreManage extends Component {
       },
       checkType: "",//仓库查看选择的类型
       ckReplys: [],
+      printFormData: {//打印订单
+      },
+      printVisible: false,
+      printImage: ""
     };
   }
 
@@ -105,26 +114,48 @@ class StoreManage extends Component {
     if(search.startTime) {
       params.startTime = search.startTime;
     }
-    if(search.carrier) {
-      params.carrier = search.carrier;
+    if(search.trackingSign) {//运单状态
+      const trackingSignMap = new Map([["已完成","1"],["未完成","2"],["进行中","3"]]);
+      params.trackingSign = trackingSignMap.get(search.trackingSign);
     }
-    if(search.objectiveCountry) {
+    if(search.objectiveCountry) {//目的国
       params.objectiveCountry = search.objectiveCountry;
     }
-    if(search.problemCause) {
+    if(search.carrier) {//承运商
+      params.carrier = search.carrier;
+    }
+    
+    if(search.problemCause) {//问题原因
       const problemCauseMap = new Map([["颜色不对","1"],["尺寸不对","2"],["破损","3"]]);
       params.problemCause = problemCauseMap.get(search.problemCause);
     }
     if(search.inlandNumber) {
       params.inlandNumber = search.inlandNumber;
     }
+    if(search.fhStatus) {//发货状态
+      const fhStatusMap = new Map([["已发货","1"],["未发货","-1"]]);
+      params.fhStatus = fhStatusMap.get(search.fhStatus);
+    }
+    if(search.hasProblem) {
+      const hasProblemsMap = new Map([["有问题","1"],["没有问题","-1"]]);
+      params.hasProblem = hasProblemsMap.get(search.hasProblem);
+    }
+
+    if(search.userReply) {
+      const userReplyMap = new Map([["已回复","1"], ["待回复","-1"]]);
+      params.userReplyMap = userReplyMap.get(search.userReply);
+    }
+
+    if(search.placeName) {
+      params.placeName = search.placeName;
+    }
 
     api.$get(apiList3.getOrders.path, params, res => {
       if(res.code !== 500) {
-        let list = objToArray(res) || [];
+        let list = res.data || [];
         this.setState({
           storeOrders: [...list],
-          totalCount: res.totalCount || 0,
+          totalCount: res.count || 0,
           loading: false
         });
       } else {
@@ -135,13 +166,47 @@ class StoreManage extends Component {
         });
       }
       
-    })
+    }, null, true)
   }
 
   setAllOrderColumn() {
     const columns = [
       {
-        title: "发件人",
+        title: "运单号",
+        dataIndex: "inlandNumber",
+        key: "inlandNumber"
+      },
+      {
+        title: "货物照片",
+        dataIndex: "goodsPhoto",
+        key: "goodsPhoto",
+        render: a => <img className="admin_action" src={a} alt="" style={{
+          minHeight: "100px",
+          borderRadius: "4px",
+          height: "100px",
+        }}/>
+      },
+      {
+        title: "问题照片",
+        dataIndex: "problemOrderImg",
+        key: "problemOrderImg",
+        render: a => <img className="admin_action" src={a} alt="" style={{
+          minHeight: "40px",
+          height: "40px",
+          borderRadius: "4px",
+        }}/>
+      },
+      {
+        title: "发货的物流商",
+        dataIndex: "placeName",
+        key: "placeName",
+        render: a=> {
+          const placeNameMap = new Map([["4px","4PX"],["dhl","DHL"],["sf","顺丰"],["zh","纵横"]]);
+          return placeNameMap.get(a);
+        }
+      },
+      {
+        title: "发货人",
         dataIndex: "sendPerson",
         key: "sendPerson"
       },
@@ -151,12 +216,12 @@ class StoreManage extends Component {
         key: "carrier"
       },
       {
-        title: "目的国家",
+        title: "目的国",
         dataIndex: "objectiveCountry",
         key: "objectiveCountry"
       },
       {
-        title: "订单状态",
+        title: "货物状态",
         key: "goodsStatus",
         dataIndex: "goodsStatus",
         render: a => {
@@ -165,7 +230,7 @@ class StoreManage extends Component {
         }
       },
       {
-        title: "订单时间",
+        title: "下单时间",
         key: "orderTime",
         dataIndex: "orderTime",
         render: a=> moment(a).format("YYYY-MM-DD")
@@ -177,214 +242,234 @@ class StoreManage extends Component {
   }
 
   setCkNoSendColumn() {//未发货的column
-    const ckNoSendColumn = [
-      {
-        title: "运单号",
-        dataIndex: "inlandNumber",
-        key: "inlandNumber",
-      },
-      {
-        title: "收货人",
-        dataIndex: "receivePerson",
-        key: "receivePerson"
-      },
-      {
-        title: "货物照片",
-        dataIndex: "goodsPhoto",
-        key: "goodsPhoto",
-        render: a => <img className="admin_action" src={a} alt="" style={{
-          height: "100px",
-          borderRadius: "4px",
-        }}/>
-      },
-      {
-        title: "海关",
-        dataIndex: "customs",
-        key: "customs"
-      },
-      {
-        title: "操作",
-        key: "action",
-        width: 200,
-        render: a => <div>
-        <span
-          style={{ cursor: "pointer", marginRight: "10px" }}
-          onClick={() => {
-            this.setState({
-              checkVisible: true,
-              checkFormData: {
-                inlandNumber: a.inlandNumber,
-              }
-            })
-          }}
-        >
-          检查
-        </span>
-        <span
-          style={{ cursor: "pointer", marginRight: "10px" }}
-          onClick={() => {
-            this.setState({
-              addEditVisible:true,
-              operationTypeDesc: "发货",
-              goodsStatus: "3",
+    let ckNoSendColumn = [...this.state.columns];
+    ckNoSendColumn.push({
+      title: "操作",
+      key: "action",
+      width: 200,
+      render: a => <div>
+      <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={() => {
+          this.setState({
+            checkVisible: true,
+            checkFormData: {
               inlandNumber: a.inlandNumber,
-              checkFormData: {
-                inlandNumber: a.inlandNumber,
-              }
-            })
-          }}
-        >
-          发货
-        </span>
-      </div>
-      }
-    ];
+            }
+          })
+        }}
+      >
+        检查
+      </span>
+      <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={() => {
+          this.setState({
+            addEditVisible:true,
+            operationTypeDesc: "发货",
+            goodsStatus: "3",
+            inlandNumber: a.inlandNumber,
+            checkFormData: {
+              inlandNumber: a.inlandNumber,
+            }
+          })
+        }}
+      >
+        发货
+      </span>
+    </div>
+    });
     this.setState({
       columns: ckNoSendColumn
     });
   }
 
-  setCkAlreadySendColumn() {//已发货
-    const ckAlreadySendColumn = [
-      {
-        title: "运单号",
-        dataIndex: "inlandNumber",
-        key: "inlandNumber"
-      },
-      {
-        title: "承运商",
-        dataIndex: "carrier",
-        key: "carrier"
-      },
-      {
-        title: "目的国家",
-        dataIndex: "objectiveCountry",
-        key: "objectiveCountry"
-      },
-      {
-        title: "备注",
-        key: "remark",
-        dataIndex: "remark",
-      },
-      {
-        title: "订单时间",
-        key: "orderTime",
-        dataIndex: "orderTime",
-        render: a=> moment(a).format("YYYY-MM-DD")
-      },
-      { 
-        title: "操作",
-        key: "action",
-        width: 200,
-        render: a => <div>
-          <span
-          style={{ cursor: "pointer", marginRight: "10px" }}
-          onClick={()=> {
+  handlePrint(a) {
+    let params = { data: a.inlandNumber};
+    message.loading();
+    if(a.placeName === "zh") {
+      return api.$post('/order_getImg', params, res => {
+        if(res.length === 1){
+          message.destroy();
+          return window.open(res[0].lable_file);
+        }
+      });
+    }
+    if(a.placeName === "sf") {
+      return api.$post('/order_sfLabelApi', params, res => {
+        if(res) {
+          message.destroy();
+          return setTimeout(()=>{
+            window.open(res);
+          })
+        }
+      });
+    }
+    if(a.placeName === "4px") {
+      api.$post('/order_imgApi', params, res => {
+        if(res.label_url_info.logistics_label) {
+          message.destroy();
+          return window.open(res.label_url_info.logistics_label);
+        }
+      });
+    }
+    if(a.placeName === "dhl") {
+      return api.$post('/order_getLabel', params, res => {
+        if(res.labelResponse && res.labelResponse.bd.labels[0].content) {
+          let str = `data:image/jpeg;base64, ${res.labelResponse.bd.labels[0].content}`;
+          setTimeout(()=>{
+            message.destroy();
             this.setState({
-              ckSendOrderVisible: true,
-              ckSendOrderFormData: {
-                inlandNumber: a.inlandNumber,
-                objectiveCountry: a.objectiveCountry
-              }
+              printVisible: true,
+              printImage: str
             })
-          }}
-        >
-          运单发货
-        </span>
-      </div>
-      }
-    ];
+          }, 1000);
+        } else {
+          message.destroy();
+          message.error(res, 2)
+        }
+      });
+    }
+  }
+
+  setCkAlreadySendColumn() {//已发货
+    let ckAlreadySendColumn = [...this.state.columns];
+    ckAlreadySendColumn.push({ 
+      title: "操作",
+      key: "action",
+      width: 200,
+      render: a => <div>
+        <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={()=> {
+          this.setState({
+            ckSendOrderVisible: true,
+            ckSendOrderFormData: {
+              inlandNumber: a.inlandNumber,
+              objectiveCountry: a.objectiveCountry
+            }
+          })
+        }}
+      >
+        运单发货
+      </span>
+      {a.inlandNumber ? <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={this.handlePrint.bind(this, a)}
+
+        // onClick={() => {
+        //   $("#print")[0].contentWindow.print();
+        // }}
+      >
+        打印面单
+      </span> : null}
+      
+    </div>
+    });
     this.setState({
       columns: ckAlreadySendColumn
     });
   }
 
   setCkProblemOrderColumn() {//问题件
-    const ckProblemOrderColumn = [
-      {
-        title: "运单号",
-        dataIndex: "inlandNumber",
-        key: "inlandNumber",
-      },
-      {
-        title: "目的国家",
-        dataIndex: "objectiveCountry",
-        key: "objectiveCountry"
-      },
-      {
-        title: "备注",
-        dataIndex: "remark",
-        key: "remark",
-      },
-      {
-        title: "订单时间",
-        key: "orderTime",
-        dataIndex: "orderTime",
-        render: a=> moment(a).format("YYYY-MM-DD")
-      },
-      {
-        title: "问题原因",
-        dataIndex: "problemCause",
-        key: "problemCause",
-        render: a => {
-          const problemCauseMap = new Map([["1","颜色不对"], ["2","破损"], ["3","尺寸不对"]]);
-          return problemCauseMap.get(a);
-        }
-      },
-      { 
-        title: "操作",
-        key: "action",
-        width: 200,
-        render: a => <div>
-          <span
-          style={{ cursor: "pointer", marginRight: "10px" }}
-          onClick={()=>{
-            this.setState({
-              ckReplyVisible: true,
-              inlandNumber: a.inlandNumber,
-              ckReplyFormData: {
-                ...this.state.ckReplyFormData,
-                inlandNumber: a.inlandNumber,
-              }
-            });
-          }}
-        >
-          仓库回复
-        </span>
+    let ckProblemOrderColumn = [...this.state.columns];
+    ckProblemOrderColumn.push({ 
+      title: "操作",
+      key: "action",
+      width: 200,
+      render: a => <div>
         <span
-          style={{ cursor: "pointer", marginRight: "10px" }}
-          onClick={()=>{
-            this.setState({
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={()=>{
+          this.setState({
+            ckReplyVisible: true,
+            inlandNumber: a.inlandNumber,
+            ckReplyFormData: {
+              ...this.state.ckReplyFormData,
               inlandNumber: a.inlandNumber,
-              ckReplyCheckVisible: true,
-            }, ()=> {
-              this.getReplys();
-            })
-          }}
-        >
-          查看
-        </span>
-      </div>
-      }
-    ];
+            }
+          });
+        }}
+      >
+        仓库回复
+      </span>
+      <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={()=>{
+          this.setState({
+            inlandNumber: a.inlandNumber,
+            ckReplyCheckVisible: true,
+          }, ()=> {
+            this.getReplys();
+          })
+        }}
+      >
+        查看
+      </span>
+    </div>
+    });
     this.setState({
       columns: ckProblemOrderColumn
     });
   }
 
   setCkUserReplyOrderColumn() {//已回复
-    const ckUserReplyOrderColumn = [
-      {
-        title: "运单号",
-        dataIndex: "waybillNumber",
-        key: "waybillNumber"
-      },
-      {
-        title: "回复内容",
-        dataIndex: "replyContent",
-        key: "replyContent"
-      }
-    ];
+    let ckUserReplyOrderColumn = [...this.state.columns];
+    ckUserReplyOrderColumn.push({
+      title: "操作",
+      key: "action",
+      width: 200,
+      render: a => <div>
+      <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={() => {
+          this.setState({
+            addEditVisible:true,
+            operationTypeDesc: "发货",
+            goodsStatus: "3",
+            inlandNumber: a.inlandNumber,
+            checkFormData: {
+              inlandNumber: a.inlandNumber,
+            }
+          })
+        }}
+      >
+        发货
+      </span>
+      <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={() => {
+          this.setState({
+            addEditVisible:true,
+            operationTypeDesc: "销毁",
+            goodsStatus: "-3",
+            inlandNumber: a.inlandNumber,
+            checkFormData: {
+              inlandNumber: a.inlandNumber,
+            }
+          })
+        }}
+      >
+        销毁
+      </span>
+      <span
+        style={{ cursor: "pointer", marginRight: "10px" }}
+        onClick={() => {
+          this.setState({
+            addEditVisible:true,
+            operationTypeDesc: "退件",
+            goodsStatus: "-2",
+            inlandNumber: a.inlandNumber,
+            checkFormData: {
+              inlandNumber: a.inlandNumber,
+            }
+          })
+        }}
+      >
+        退件
+      </span>
+      </div>
+    });
     this.setState({columns: ckUserReplyOrderColumn});
   }
 
@@ -392,8 +477,8 @@ class StoreManage extends Component {
     const ckUserNoReplyOrderColumn = [
       {
         title: "运单号",
-        dataIndex: "waybillNumber",
-        key: "waybillNumber"
+        dataIndex: "inlandNumber",
+        key: "inlandNumber"
       },
       {
         title: "待回复内容",
@@ -412,17 +497,6 @@ class StoreManage extends Component {
       noChoice,
       operationTypeDesc,
     } = this.state;
-    const menu = (
-      <Menu
-        onClick={e => {
-          this.setState({ reason: e.key });
-        }}
-      >
-        {reason.map((a, b) => {
-          return <Menu.Item key={a}>{a}</Menu.Item>;
-        })}
-      </Menu>
-    );
     return (
       <Modal
         title={modalTitle}
@@ -450,7 +524,9 @@ class StoreManage extends Component {
         }
       >
         <div style={{textAlign: "center"}}>
-          {operationTypeDesc === "发货" ? `确定已检查完，将运单号为:${this.state.inlandNumber}${operationTypeDesc}吗?` : "todo"}
+          {
+          operationTypeDesc === "发货" ? `确定已检查完，将运单号为:${this.state.inlandNumber}${operationTypeDesc}吗?` :
+           `确定将运单号为:${this.state.inlandNumber}${operationTypeDesc}吗?`}
         </div>
         {noChoice ? (
           <Alert
@@ -514,9 +590,15 @@ class StoreManage extends Component {
       params.problemCause = problemCauseMap.get(checkFormData.problemCause);
     }
     api.$get(apiList3.getOrders.path, params, res => {
-      this.setState({
-        checkVisible: false
-      })
+      if(res.code === 200 && res.msg === "success") {
+        this.setState({
+          checkVisible: false
+        });
+        this.getOrders();
+        message.success("提交成功",2);
+      }else {
+        message.error(res.msg, 2);
+      }
     })
   }
 
@@ -905,13 +987,7 @@ class StoreManage extends Component {
         dataSource={this.state.ckReplys}
         bordered
         loading={this.state.loading}
-        pagination={{
-          current: 1,
-          pageSize: 10,
-          showQuickJumper: false,
-          showSizeChanger: false,
-          // total: this.state.totalCount
-        }}
+        pagination={false}
       />
       {noChoice ? (
           <Alert
@@ -935,10 +1011,15 @@ class StoreManage extends Component {
     const { inlandNumber, userId, goodsStatus } = this.state;
     const params = {inlandNumber, userId, type: "ckOrderUpdate", goodsStatus};
     api.$get(apiList3.getOrders.path, params , res => {
+      if(res.code === 200 && res.msg === "success") {
         this.setState({
           addEditVisible: false
         });
-        this.getOrders();
+        message.success("发货成功", 2);
+      } else {
+        message.error(res.msg, 2);
+      }
+      this.getOrders();
     })
   }
 
@@ -957,43 +1038,11 @@ class StoreManage extends Component {
       this.setState({
         ckSendOrderVisible: false
       });
-    })
-  }
-
-  handleChangeRadio(e) {//radio改变获取数据
-    const type = e.target.value
-    if(type === "allOrder") {
-      this.setAllOrderColumn();
-    }
-    if(type === "ckNoSend") {
-      this.setCkNoSendColumn();
-    }
-    if(type === "ckAlreadySendOrder") {
-      this.setCkAlreadySendColumn();
-    }
-    if(type === "ckProblemOrder") {
-      this.setCkProblemOrderColumn();
-    }
-    if(type === "ckUserReplyOrder") {
-      this.setCkUserReplyOrderColumn();
-    }
-    if(type === "ckUserNoReplyOrder") {
-      this.setCkUserNoReplyOrderColumn();
-    }
-
-    this.setState({
-      search: {
-        type,
-        startTime: null,
-        endTime: null,
-        objectiveCountry: null,
-        carrier: null, 
-        pageIndex: 1,
-        pageSize: 10,
-        problemCause: "",
+      if(res.code === 200 && res.msg === "success") {
+        message.success('提交成功', 2);
+      } else {
+        message.error(res.msg, 2);
       }
-    }, () => {
-      this.getOrders()
     })
   }
 
@@ -1009,141 +1058,87 @@ class StoreManage extends Component {
         let list = objToArray(res) || [];
         this.setState({
           ckReplys: [...list],
-          totalCount: res.totalCount || 0,
           loading: false
         });
       } else {
         this.setState({
           ckReplys: [],
-          totalCount:  0,
           loading: false
         });
       }
     });
   }
 
-  searchBar() {
-    const { search } = this.state
-    return (
-      <div className="search-title" style={{ minWidth: "1170px" }}>
-        <div className="params params-20">
-          运单类型：
-          <Radio.Group onChange={this.handleChangeRadio.bind(this)} defaultValue={search.type} buttonStyle="solid">
-            <Radio.Button value="allOrder">全部</Radio.Button>
-            <Radio.Button value="ckNoSend">未发货</Radio.Button>
-            <Radio.Button value="ckAlreadySendOrder">已发货</Radio.Button>
-            <Radio.Button value="ckProblemOrder">问题件</Radio.Button>
-            <Radio.Button value="ckUserReplyOrder">用户已回复</Radio.Button>
-            <Radio.Button value="ckUserNoReplyOrder">用户待回复</Radio.Button>
-          </Radio.Group>
-        </div>
-        <div className="params params-20">
-          时间：
-          <RangePicker
-            value={[
-              search.startTime ? moment(search.startTime, dateFormat) : null,
-              search.endTime ? moment(search.endTime, dateFormat) : null
-            ]}
-            allowClear={false}
-            format={dateFormat}
-            onChange={(date, dateString) => {
-              this.setState({
-                search: {
-                  ...search,
-                  startTime: dateString[0],
-                  endTime: dateString[1]
-                }
-              });
-            }}
-          />
-        </div>
-        <div className="params params-20" style={{ minWidth: "200px" }}>
-          <span>运单号：</span>
-          <Input
-            placeholder="运单号"
-            className="store_freight"
-            value={search.inlandNumber}
-            style={{ width: "200px" }}
-            onChange={e => {
-              this.setState({
-                search: {
-                  ...search,
-                  inlandNumber: e.target.value
-                } 
-              });
-            }}
-          />
-        </div>
-        { search.type === "allOrder" ? <div className="params params-20" style={{ minWidth: "200px" }}>
-          <span>目的国家：</span>
-          <Input
-            placeholder="目的国家"
-            className="store_freight"
-            value={search.objectiveCountry}
-            style={{ width: "200px" }}
-            onChange={e => {
-              this.setState({
-                search: {
-                  ...search,
-                  objectiveCountry: e.target.value
-                } 
-              });
-            }}
-          />
-        </div> : null}
-        {search.type === "allOrder" ? <div className="params params-20" style={{ minWidth: "200px" }}>
-          <span>承运商：</span>
-          <Input
-            placeholder="承运商"
-            className="store_freight"
-            value={search.carrier}
-            style={{ width: "200px" }}
-            onChange={e => {
-              this.setState({
-                search: {
-                  ...search,
-                  carrier: e.target.value
-                } 
-              });
-            }}
-          />
-        </div> : null}
-        
-        {search.type === "ckProblemOrder" ? <div className="params params-20" style={{ minWidth: "170px" }}>
-          <span>问题原因：</span>
-          <Select
-            value={search.problemCause || "选择问题原因"}
-            style={{ width: 200 }}
-            onChange={val => {
-              this.setState(
-                {
-                  search: { ...search, problemCause: val }
-                }
-              );
-            }}
-          >
-            {reason.map(a => {
-              return (
-                <Select.Option value={a} key={a}>
-                  {a}
-                </Select.Option>
-              );
-            })}
-          </Select>
-        </div> : null}
-        
-        <div className="params" style={{ marginRight: "60px" }}>
-          <Button
-            className="search-btn"
-            onClick={() => {
-              this.getOrders();
-            }}
-          >
-            查询
-          </Button>
-        </div>
-      </div>
-    );
+  handleClearSearchBar() {
+    this.setState({
+      search: {
+        startTime: null,
+        endTime: null,
+        objectiveCountry: null,
+        carrier: null, 
+        pageIndex: 1,
+        pageSize: 10,
+        problemCause: "",
+        trackingSign: "",
+        fhStatus: "",
+        hasProblem: "",
+        userReply:"",
+        placeName: "",
+        type: "ckAllOrder"
+      }
+    }, () => {
+      this.getOrders();
+    })
+  }
+
+
+  handleSearch() {
+    this.setAllOrderColumn();
+    this.setState({
+      search: {
+        ...this.state.search,
+        pageSize: 10,
+        dataIndex: 1
+      }
+    }, ()=> {
+      if (this.isUnableOrder) {//未发货
+        this.setCkNoSendColumn();
+      }
+      if (this.isAbleOrder) {//已发货
+        this.setCkAlreadySendColumn();
+      }
+      if(this.isProblem) {//问题件
+        this.setCkProblemOrderColumn();
+      }
+      if(this.isUserReply) {//已回复
+        this.setCkUserReplyOrderColumn();
+      }
+
+      this.getOrders();
+    });
+  }
+
+  handleChangeSearchSelect(val, paramName) {
+    const { search } = this.state;
+    this.setState({
+      search: { 
+        ...search,
+      [paramName]: val,
+      pageIndex: 1,
+      pageSize: 10 
+      }
+    });
+  }
+
+  handleChangeDatePicker(data, dateString) {
+    const { search } = this.state;
+    this.setState({
+      search: {
+        ...search,
+        startTime: dateString[0],
+        endTime: dateString[1]
+      }
+    });
   }
 
   handleCkReply() {//仓库管理员回复
@@ -1156,10 +1151,15 @@ class StoreManage extends Component {
       params.replyContent = ckReplyFormData.replyContent
     }
     api.$get(apiList3.getOrders.path, params, res => {
-      this.setState({
-        ckReplyVisible: false,
-        ckReplyFormData: {}
-      })
+      if(res.code === 200 && res.msg === "success") {
+        this.setState({
+          ckReplyVisible: false,
+          ckReplyFormData: {}
+        });
+        message.success("回复成功", 2);
+      } else {
+        message.error(res.message, 2);
+      }
     })
   }
 
@@ -1215,18 +1215,38 @@ class StoreManage extends Component {
     })
   }
 
+  get isUnableOrder() {
+    const { search } = this.state;
+    return search.fhStatus === "未发货";
+  }
+
+  get isAbleOrder() {
+    const { search } = this.state;
+    return search.fhStatus === "已发货";
+  }
+
+  get isProblem() {
+    const { search } = this.state;
+    return search.hasProblem === "有问题";
+  }
+
+  get isUserReply() {
+    const { search } = this.state;
+    return search.userReply === "已回复";
+  }
+
   render() {
     return (
       <div className="admin plat">
-        <iframe
-          src={require("./test2.pdf")}
-          id="print"
-          style={{ display: "none" }}
-          title="123"
-          frameBorder="0"
-        />
         <div className="tableWarp">
-          {this.searchBar()}
+          {/* {this.searchBar()} */}
+          <OrderSearchBar 
+            handleChangeSearch={this.handleChangeSearchSelect.bind(this)}
+            handleClearSearchBar={this.handleClearSearchBar.bind(this)}
+            handleChangeDatePicker={this.handleChangeDatePicker.bind(this)}
+            handleSearch={this.handleSearch.bind(this)}
+            search={this.state.search}
+          />
           <Table
             columns={this.state.columns}
             dataSource={this.state.storeOrders}
@@ -1237,7 +1257,8 @@ class StoreManage extends Component {
               pageSize: this.state.search.pageSize,
               showQuickJumper: true,
               showSizeChanger: true,
-              total: this.state.totalCount
+              total: this.state.totalCount,
+              showTotal: () =>`共${this.state.totalCount}条`
             }}
             onChange={this.handleTableChange.bind(this)}
           />
@@ -1247,6 +1268,25 @@ class StoreManage extends Component {
         {this.sendOrderModal()}
         {this.ckReplyModal()}
         {this.ckReplyCheckModal()}
+        
+        <Modal
+          visible={this.state.printVisible}
+          onCancel={()=>{
+            this.setState({
+              printVisible: false,
+              printImage:""
+            });
+          }}
+          footer={
+            <div className="action">
+               <ReactToPrint
+                trigger={() => <a href="#"><Button>打印</Button></a>}
+                content={() => this.componentRef}
+              />
+              </div>}
+          >
+              <img src={this.state.printImage} alt="" style={{height: "500px"}} ref={el => (this.componentRef = el)}></img>
+        </Modal>
       </div>
     );
   }
@@ -1256,8 +1296,6 @@ class ProblemImage extends React.Component {
   state = {
     loading: false,
   };
-
-
 
   beforeUpload(file) {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';

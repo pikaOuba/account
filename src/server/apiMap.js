@@ -2,8 +2,9 @@ const serverPath = "https://company.cnshanzhi.com:8005/";
 // const serverPath2 = "http://118.25.155.176";
 // const serverPath2 = "https://news.cnshanzhi.com";
 const serverPath2 = "https://company.cnshanzhi.com";
-const serverPath3 = "http://jiekou.4980.cn/action.php";
+const serverPath3 = "http://jiekou.4980.cn";
 const serverPath4 = "http://jiekou.4980.cn/upload.php";
+
 let uploadServerPath = "http://jiekou.4980.cn/";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -88,6 +89,19 @@ const apiList2 = {
 };
 const apiList3 = {
   getOrders : {//获取订单
+    path: "action.php"
+  },
+  imgApi: {
+    path: "imgApi.php"
+  },
+  dhlApi: {
+    path: "dhlApi.php"
+  },
+  sfLabelApi: {
+    path: "sfLabelApi.php"
+  },
+  ZhApi: {
+    path: "ZhApi.php?type=getImg"
   }
 };
 
@@ -106,7 +120,7 @@ if (!isDev) {
     apiList2[key].path = serverPath2 + apiList2[key].path;
   });
   Object.keys(apiList3).forEach(key => {
-    apiList3[key].path = serverPath3;
+    apiList3[key].path = `${serverPath3}/${apiList3[key].path}`;
   });
   Object.keys(apiList4).forEach(key => {
     apiList4[key].path = serverPath4 + apiList4[key].path;
@@ -120,7 +134,7 @@ if (!isDev) {
     apiList2[key].path = "/server2" + apiList2[key].path;
   });
   Object.keys(apiList3).forEach(key => {
-    apiList3[key].path = serverPath3;
+    apiList3[key].path = `${serverPath3}/${apiList3[key].path}`;
   });
   Object.keys(apiList4).forEach(key => {
     apiList4[key].path = "/server4" + apiList4[key].path;
