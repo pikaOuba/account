@@ -141,15 +141,6 @@ export default class OrderSearchBar extends Component {
             allowClear={false}
             format={dateFormat}
             onChange={(date, dateString) => this.handleChangeDatePicker(date, dateString)}
-            // onChange={(date, dateString) => {
-            //   this.setState({
-            //     search: {
-            //       ...search,
-            //       startTime: dateString[0],
-            //       endTime: dateString[1]
-            //     }
-            //   });
-            // }}
           />
         </div>
         <div className="params params-20" style={{ minWidth: "200px" }}>
@@ -160,15 +151,6 @@ export default class OrderSearchBar extends Component {
             value={search.inlandNumber}
             style={{ width: "200px" }}
             onChange={(e) => this.handleChangeSearch(e.target.value, "inlandNumber")}
-
-            // onChange={e => {
-            //   this.setState({
-            //     search: {
-            //       ...search,
-            //       inlandNumber: e.target.value
-            //     } 
-            //   });
-            // }}
           />
         </div>
         <div className="params params-20" style={{ minWidth: "200px" }}>
@@ -178,14 +160,7 @@ export default class OrderSearchBar extends Component {
             className="store_freight"
             value={search.objectiveCountry}
             style={{ width: "200px" }}
-            onChange={e => {
-              this.setState({
-                search: {
-                  ...search,
-                  objectiveCountry: e.target.value
-                } 
-              });
-            }}
+            onChange={(val) => this.handleChangeSearch(val,"objectiveCountry")}
           />
         </div>
         <div className="params params-20" style={{ minWidth: "200px" }}>
@@ -195,14 +170,7 @@ export default class OrderSearchBar extends Component {
             className="store_freight"
             value={search.carrier}
             style={{ width: "200px" }}
-            onChange={e => {
-              this.setState({
-                search: {
-                  ...search,
-                  carrier: e.target.value
-                } 
-              });
-            }}
+            onChange={(e) => this.handleChangeSearch(e.target.value, "carrier")}
           />
         </div> 
         <div className="params params-20" style={{ minWidth: "170px" }}>
@@ -210,13 +178,7 @@ export default class OrderSearchBar extends Component {
           <Select
             value={search.problemCause || "选择问题原因"}
             style={{ width: 200 }}
-            onChange={val => {
-              this.setState(
-                {
-                  search: { ...search, problemCause: val }
-                }
-              );
-            }}
+            onChange={(val) => this.handleChangeSearch(val,"problemCause")}
           >
             {reason.map(a => {
               return (
